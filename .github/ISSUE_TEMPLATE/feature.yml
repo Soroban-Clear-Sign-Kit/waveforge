@@ -1,0 +1,40 @@
+name: Feature Request
+description: Propose a new feature, rule, or enhancement for waveforge
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What problem or limitation does this feature address?
+    validations:
+      required: true
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the proposed design, API, or behavioral changes.
+    validations:
+      required: true
+  - type: checkboxes
+    id: done-when
+    attributes:
+      label: Done when
+      description: Checklist of acceptance criteria required for completion.
+      options:
+        - label: Implementation complete with tests added
+          required: true
+        - label: Lint and typecheck pass cleanly
+          required: true
+        - label: Documentation in README or docs updated
+          required: true
+  - type: textarea
+    id: files-to-touch
+    attributes:
+      label: Files to touch
+      description: List files or directories likely to be modified or created.
+      placeholder: |
+        - src/repo/
+        - test/fixtures/
+    validations:
+      required: false

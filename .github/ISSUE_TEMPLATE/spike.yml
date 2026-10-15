@@ -1,0 +1,25 @@
+name: Spike
+description: Propose an architectural or feasibility spike
+labels: ["spike"]
+body:
+  - type: textarea
+    id: question-to-answer
+    attributes:
+      label: Question to answer
+      description: What specific technical question or uncertainty must this spike resolve?
+    validations:
+      required: true
+  - type: textarea
+    id: what-to-investigate
+    attributes:
+      label: What to investigate
+      description: What APIs, tools, algorithms, or prototypes should be explored?
+    validations:
+      required: true
+  - type: textarea
+    id: expected-output
+    attributes:
+      label: Expected output
+      description: What is the expected deliverable (e.g., decision document, sample code, benchmark)?
+    validations:
+      required: true
