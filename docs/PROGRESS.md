@@ -111,6 +111,28 @@
   - Incremental `git commit` and `git push` runs: all succeeded
 - **Open issues**: None.
 
+## 2026-10-15: Step 06 - Repo checks R1 to R6
+- **What was built**:
+  - Implemented pure async repository readiness checks under `src/repo/`:
+    - `R1` (license): recognizes Apache-2.0, MIT, BSD-2/3, MPL-2.0, GPL-3.0, LGPL in `LICENSE`, `LICENSE.md`, or `COPYING`. Fails if missing, warns if unrecognized.
+    - `R2` (readme): checks `README.md` presence (fail if missing), first 600 characters mention Stellar or Soroban (fail if missing), install/quickstart/getting started heading (warn if missing), placeholders `LIVE_DEMO_URL`, `LIVE_APP_URL`, `LIVE_API_URL`, `DEMO_VIDEO_URL`, `TODO`, `TBD`, and `lorem ipsum` (warn and list lines).
+    - `R3` (contributing): checks `CONTRIBUTING.md` presence (fail if missing), setup and test sections (warn if missing), mentions "Stellar Wave" (warn if missing), bans dollar amounts, `/claim`, or `paid on merge` (fail and list lines in evidence).
+    - `R4` (security): checks `SECURITY.md` exists (warn if missing).
+    - `R5` (templates): checks at least one YAML issue form in `.github/ISSUE_TEMPLATE` (warn if missing) and `config.yml` with `blank_issues_enabled: false` (warn if missing), parsed with `yaml`.
+    - `R6` (ci): checks `.github/workflows/*.yml` triggered on `pull_request` with a run step containing `test` (fail if none found).
+  - Created test fixtures under `test/fixtures/repos/`: `good`, `missing-everything`, `bad-contributing`, and `placeholders`.
+  - Added table-driven tests for R1-R6 in `test/repo-checks.test.ts` plus integration tests across fixtures.
+  - Wired R1-R6 into `runRepoChecks` in `src/repo/index.ts`.
+- **Commands run with results**:
+  - `pnpm build`: passed (TSUP built `dist/index.js`, `dist/cli.js`, and TypeScript declaration files)
+  - `pnpm lint`: passed (ESLint clean across repository)
+  - `pnpm typecheck`: passed (`tsc --noEmit` clean)
+  - `pnpm test`: passed (53 tests passed across 6 test suites)
+  - `pnpm test:coverage`: passed with 88.61% lines coverage
+  - Incremental `git commit` and `git push`: all commits pushed one after the other
+- **Open issues**: None.
+
+
 
 
 
