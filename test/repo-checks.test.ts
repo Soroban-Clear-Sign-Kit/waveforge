@@ -4,6 +4,8 @@ import { r1Check } from "../src/repo/r1.js";
 import { r2Check } from "../src/repo/r2.js";
 import { r3Check } from "../src/repo/r3.js";
 import { r4Check } from "../src/repo/r4.js";
+import { r5Check } from "../src/repo/r5.js";
+import { r6Check } from "../src/repo/r6.js";
 
 import type { CheckResult } from "../src/report.js";
 
@@ -155,4 +157,61 @@ describe("R4 - Security policy check", () => {
     });
   }
 });
+
+describe("R5 - Issue templates check", () => {
+  const cases = [
+    {
+      name: "passes on good repo with issue form and valid config.yml",
+      fixture: "good",
+      expectedStatus: "pass",
+    },
+    {
+      name: "warns when ISSUE_TEMPLATE directory is missing",
+      fixture: "missing-everything",
+      expectedStatus: "warn",
+      expectedMessageMatch: /ISSUE_TEMPLATE/,
+    },
+  ];
+
+  for (const tc of cases) {
+    it(tc.name, async () => {
+      const root = path.join(FIXTURES_DIR, tc.fixture);
+      const res = await r5Check(root);
+      expect(res.id).toBe("R5");
+      expect(res.status).toBe(tc.expectedStatus);
+      if (tc.expectedMessageMatch) {
+        expect(res.message).toMatch(tc.expectedMessageMatch);
+      }
+    });
+  }
+});
+
+describe("R6 - CI workflow check", () => {
+  const cases = [
+    {
+      name: "passes on good repo with pull_request trigger and test step",
+      fixture: "good",
+      expectedStatus: "pass",
+    },
+    {
+      name: "fails when workflows directory is missing",
+      fixture: "missing-everything",
+      expectedStatus: "fail",
+      expectedMessageMatch: /workflows/,
+    },
+  ];
+
+  for (const tc of cases) {
+    it(tc.name, async () => {
+      const root = path.join(FIXTURES_DIR, tc.fixture);
+      const res = await r6Check(root);
+      expect(res.id).toBe("R6");
+      expect(res.status).toBe(tc.expectedStatus);
+      if (tc.expectedMessageMatch) {
+        expect(res.message).toMatch(tc.expectedMessageMatch);
+      }
+    });
+  }
+});
+
 
