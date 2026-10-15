@@ -1,0 +1,58 @@
+name: New Check Proposal
+description: Propose a new repository readiness check for waveforge
+labels: ["new-check"]
+body:
+  - type: input
+    id: check-id-proposal
+    attributes:
+      label: Check ID Proposal
+      description: Proposed unique check identifier (e.g., R11, R12).
+      placeholder: "R11"
+    validations:
+      required: true
+  - type: textarea
+    id: what-it-detects
+    attributes:
+      label: What it detects
+      description: Describe the specific file pattern, configuration, or condition this check evaluates.
+    validations:
+      required: true
+  - type: textarea
+    id: why-it-matters
+    attributes:
+      label: Why it matters for Wave contributors
+      description: How does this check improve repo readiness or prevent issues during a Stellar Wave?
+    validations:
+      required: true
+  - type: textarea
+    id: passing-example
+    attributes:
+      label: Passing Example
+      description: Provide an example code snippet, file content, or configuration that passes the check.
+      placeholder: |
+        // Example passing code or configuration
+    validations:
+      required: true
+  - type: textarea
+    id: failing-example
+    attributes:
+      label: Failing Example
+      description: Provide an example that fails this check and triggers a diagnostic warning or error.
+      placeholder: |
+        // Example failing code or configuration
+    validations:
+      required: true
+  - type: checkboxes
+    id: done-when
+    attributes:
+      label: Done when
+      description: Checklist of acceptance criteria required for completion.
+      options:
+        - label: Single check file added under src/repo/
+          required: true
+        - label: Minimal fixture repo added under test/fixtures/repos/
+          required: true
+        - label: Table-driven test written and passing
+          required: true
+        - label: Row added to README.md readiness checks table
+          required: true
