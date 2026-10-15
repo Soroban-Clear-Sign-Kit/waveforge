@@ -19,15 +19,17 @@ describe("waveforge scaffold", () => {
 
   it("runs repo checks returning report", async () => {
     const report = await runRepoChecks(".");
+    expect(report.kind).toBe("repo");
     expect(report.target).toBe(".");
-    expect(report.checks.length).toBe(10);
-    expect(report.summary.total).toBe(10);
+    expect(report.results.length).toBe(10);
+    expect(report.score).toBe(100);
   });
 
   it("lints issue markdown returning report", async () => {
     const report = await lintIssueMarkdown("test.md", "# Test Issue");
+    expect(report.kind).toBe("issue");
     expect(report.target).toBe("test.md");
-    expect(report.checks.length).toBe(11);
-    expect(report.summary.total).toBe(11);
+    expect(report.results.length).toBe(11);
+    expect(report.score).toBe(100);
   });
 });

@@ -1,5 +1,5 @@
-import type { CheckItem, Report } from "../report.js";
-import { createEmptyReport } from "../report.js";
+import type { CheckResult, Report } from "../report.js";
+import { score } from "../report.js";
 import { r1Check } from "./r1.js";
 import { r2Check } from "./r2.js";
 import { r3Check } from "./r3.js";
@@ -29,16 +29,20 @@ export interface CheckOptions {
 }
 
 export async function runRepoChecks(repoPath: string, _options: CheckOptions = {}): Promise<Report> {
-  const report = createEmptyReport(repoPath);
+  const results: CheckResult[] = [];
 
   for (const check of repoChecks) {
-    const result: CheckItem = await check.run();
-    report.checks.push(result);
-    report.summary.total += 1;
-    report.summary[result.status] += 1;
+    const result: CheckResult = await check.run();
+    results.push(result);
   }
 
-  return report;
+  return {
+    kind: "repo",
+    target: repoPath,
+    score: score(results),
+    results,
+    generatedAt: new Date().toISOString(),
+  };
 }
 
 export {

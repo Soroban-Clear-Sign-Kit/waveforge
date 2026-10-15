@@ -1,0 +1,66 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`report formatters > formats json report 1`] = `
+"{
+  "kind": "repo",
+  "target": "/mock/repo",
+  "score": 63,
+  "generatedAt": "2026-10-15T12:00:00.000Z",
+  "results": [
+    {
+      "id": "R1",
+      "title": "Cargo Configuration",
+      "status": "pass",
+      "message": "Cargo.toml exists"
+    },
+    {
+      "id": "R2",
+      "title": "Contract ID",
+      "status": "warn",
+      "message": "Only testnet ID found",
+      "fix": "Add mainnet ID"
+    },
+    {
+      "id": "R3",
+      "title": "Secrets Safety",
+      "status": "fail",
+      "message": "Raw secret key exposed",
+      "fix": "Remove secret key"
+    },
+    {
+      "id": "R4",
+      "title": "On-Chain Verification",
+      "status": "skipped",
+      "message": "Offline mode active"
+    }
+  ]
+}"
+`;
+
+exports[`report formatters > formats markdown report with heading, score, and non-pass table 1`] = `
+"## WaveForge Repository Report
+
+- **Target**: \`/mock/repo\`
+- **Score**: **63%**
+- **Generated At**: 2026-10-15T12:00:00.000Z
+
+| Status | ID | Title | Message | Fix |
+| :--- | :--- | :--- | :--- | :--- |
+| WARN | R2 | Contract ID | Only testnet ID found | Add mainnet ID |
+| FAIL | R3 | Secrets Safety | Raw secret key exposed | Remove secret key |
+| SKIP | R4 | On-Chain Verification | Offline mode active | - |"
+`;
+
+exports[`report formatters > formats text report with aligned PASS/WARN/FAIL/SKIP and fix hints 1`] = `
+"WaveForge REPO Report - /mock/repo
+Score: 63% | Generated: 2026-10-15T12:00:00.000Z
+
+PASS  R1  Cargo Configuration - Cargo.toml exists
+WARN  R2  Contract ID - Only testnet ID found
+FAIL  R3  Secrets Safety - Raw secret key exposed
+SKIP  R4  On-Chain Verification - Offline mode active
+
+Fix hints:
+  R2: Add mainnet ID
+  R3: Remove secret key"
+`;

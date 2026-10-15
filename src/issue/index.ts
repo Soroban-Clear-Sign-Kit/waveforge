@@ -1,12 +1,12 @@
-import type { CheckItem, Report } from "../report.js";
-import { createEmptyReport } from "../report.js";
+import type { CheckResult, Report } from "../report.js";
+import { score } from "../report.js";
 import { issueRules } from "./rules.js";
 
 export async function lintIssueMarkdown(filePath: string, _content: string): Promise<Report> {
-  const report = createEmptyReport(filePath);
+  const results: CheckResult[] = [];
 
   for (const rule of issueRules) {
-    const item: CheckItem = rule.validate
+    const item: CheckResult = rule.validate
       ? await rule.validate(_content)
       : {
           id: rule.id,
@@ -15,12 +15,16 @@ export async function lintIssueMarkdown(filePath: string, _content: string): Pro
           fix: rule.fix,
           status: "pass",
         };
-    report.checks.push(item);
-    report.summary.total += 1;
-    report.summary[item.status] += 1;
+    results.push(item);
   }
 
-  return report;
+  return {
+    kind: "issue",
+    target: filePath,
+    score: score(results),
+    results,
+    generatedAt: new Date().toISOString(),
+  };
 }
 
 export * from "./rules.js";
