@@ -155,7 +155,72 @@ Before issues are submitted to a Stellar Wave reward pool, `waveforge issue` ver
 
 ---
 
+## Roadmap & Milestones
+
+### `v0.1.0` Foundation (Released)
+*Target: October 2026*
+
+Everything the README documents today:
+- [x] Repo checks R1 to R10, including Soroban CI and secret-seed detection
+- [x] On-chain contract ID check (R8) that never passes offline
+- [x] Issue rules I1 to I7, S1 to S3 and F1 with suggested complexity
+- [x] Text, Markdown and JSON reports; `init-action` command
+- [x] Published to npm (`waveforge-stellar`)
+
+### `v0.2.0` More Checks
+*Target: Q4 2026*
+
+Catch more real problems in Soroban repos:
+- [ ] **R11**: TTL-extension heuristic for contract code (`High` complexity)
+- [ ] **R12**: `require_auth` presence per state-changing function (spike first) (`High` complexity)
+- [ ] **R13**: Testnet deploy script present (`Trivial` complexity)
+- [ ] More issue-rule fixtures from real Stellar Wave issues (`Trivial` complexity)
+- [ ] Translated messages (`Medium` complexity)
+
+### `v0.3.0` Integrations
+*Target: Q1 2027*
+
+Plug into more toolchains:
+- [ ] **SARIF Output**: Native SARIF output for GitHub code scanning (`Medium` complexity)
+- [ ] **`--fix` Mode**: `--fix` mode for template files (`Medium` complexity)
+- [ ] **Go Repository Support**: Go repository support (`go test`, `golangci-lint`) (`Medium` complexity)
+
+### `v1.0.0` Stable
+*Target: 2027*
+
+Stable check IDs and library API:
+- [ ] Frozen check IDs with a deprecation policy
+- [ ] Stable library API with semver guarantees
+
+---
+
+## Out of Scope for This Repository
+
+- **The GitHub Action, comments and job summaries**: Owned by [`waveforge-action`](https://github.com/Soroban-Clear-Sign-Kit/waveforge-action).
+- **Hosting a web dashboard**: waveforge is a CLI and library without a hosted server or database.
+- **Deciding Wave approvals**: That is the organizers' call.
+
+---
+
+## How to Help
+
+- Roadmap items for the current milestone become GitHub issues with a **"Done when"** checklist and a complexity (**Trivial**, **Medium** or **High**).
+- During a Stellar Wave, these issues carry the `Stellar Wave` label and you can apply for them at [drips.network/wave](https://drips.network/wave). Read [CONTRIBUTING.md](CONTRIBUTING.md) first.
+- Want something that is not listed? Open a feature issue with the problem it solves. Items move between milestones based on contributor interest and maintainer review.
+
+---
+
+## How This Roadmap Is Maintained
+
+- Targets are estimates, not promises.
+- An item is ticked only when its PR is merged and released.
+- Each release updates this file and `CHANGELOG.md` together.
+- Scope changes are recorded in `docs/DECISIONS.md`.
+
+---
+
 [Contributing](CONTRIBUTING.md) · [Security Policy](SECURITY.md) · [License](LICENSE) · [Stellar Wave Documentation](https://docs.drips.network/wave)
+
 
 
 
