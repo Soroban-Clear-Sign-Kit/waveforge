@@ -41,3 +41,18 @@
   - `git commit` & `git push` for each documentation increment (all passed).
 - **Open issues**: None.
 
+## 2026-10-15 - Step 02
+- **What was built**:
+  - Created `.github/workflows/ci.yml` triggered on `pull_request` and `push` to `main`, matrix testing across Node 20 and 22.
+  - Configured pipeline steps: `actions/checkout@v4` -> `pnpm/action-setup@v4` -> `actions/setup-node@v4` (cache pnpm) -> `pnpm install --frozen-lockfile` -> `pnpm lint` -> `pnpm typecheck` -> `pnpm build` -> `pnpm test:coverage`.
+  - Parsed and validated the YAML syntax with `yaml` package and added automated unit tests in `test/ci.test.ts`.
+- **Commands run with results**:
+  - YAML parse script: succeeded (valid syntax and schema)
+  - `pnpm lint`: succeeded (0 errors, 0 warnings)
+  - `pnpm typecheck`: succeeded (0 errors)
+  - `pnpm test`: succeeded (5 tests passed across 2 suites)
+  - `pnpm test:coverage`: succeeded (100% statements, 100% funcs, 100% lines)
+  - `pnpm build`: succeeded (ESM bundle + types generated in `dist/`)
+- **Open issues**: None.
+
+
