@@ -6,6 +6,7 @@ import { r3Check } from "../src/repo/r3.js";
 import { r4Check } from "../src/repo/r4.js";
 import { r5Check } from "../src/repo/r5.js";
 import { r6Check } from "../src/repo/r6.js";
+import { runRepoChecks } from "../src/repo/index.js";
 
 import type { CheckResult } from "../src/report.js";
 
@@ -213,5 +214,28 @@ describe("R6 - CI workflow check", () => {
     });
   }
 });
+
+describe("runRepoChecks across fixtures", () => {
+  it("runs on good fixture with passing R1 to R6 checks", async () => {
+    const report = await runRepoChecks(path.join(FIXTURES_DIR, "good"));
+    expect(report.kind).toBe("repo");
+    const r1ToR6 = report.results.slice(0, 6);
+    expect(r1ToR6.every((r) => r.status === "pass")).toBe(true);
+    expect(report.score).toBe(100);
+  });
+
+  it("runs on missing-everything fixture with expected failures and warnings", async () => {
+    const report = await runRepoChecks(path.join(FIXTURES_DIR, "missing-everything"));
+    expect(report.kind).toBe("repo");
+    const statuses = Object.fromEntries(report.results.map((r) => [r.id, r.status]));
+    expect(statuses["R1"]).toBe("fail");
+    expect(statuses["R2"]).toBe("fail");
+    expect(statuses["R3"]).toBe("fail");
+    expect(statuses["R4"]).toBe("warn");
+    expect(statuses["R5"]).toBe("warn");
+    expect(statuses["R6"]).toBe("fail");
+  });
+});
+
 
 

@@ -2,7 +2,7 @@ import path from "node:path";
 import type { CheckResult } from "../report.js";
 import { fileExists } from "../util/fs.js";
 
-export async function r4Check(root: string): Promise<CheckResult> {
+export async function r4Check(root: string, _options?: unknown): Promise<CheckResult> {
   const candidateFiles = ["SECURITY.md", "security.md", path.join(".github", "SECURITY.md")];
   let found = false;
 

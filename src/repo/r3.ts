@@ -12,7 +12,7 @@ const SETUP_HEADING_REGEX = /^#{1,6}\s+.*(setup|installation|getting\s+started)/
 const TEST_HEADING_REGEX = /^#{1,6}\s+.*(test|testing)/im;
 const STELLAR_WAVE_REGEX = /stellar\s+wave/i;
 
-export async function r3Check(root: string): Promise<CheckResult> {
+export async function r3Check(root: string, _options?: unknown): Promise<CheckResult> {
   const candidateFiles = ["CONTRIBUTING.md", "contributing.md"];
   let foundFile: string | null = null;
   let content: string | null = null;

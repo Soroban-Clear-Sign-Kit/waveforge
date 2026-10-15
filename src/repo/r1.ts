@@ -36,7 +36,7 @@ const LICENSE_PATTERNS: LicensePattern[] = [
   },
 ];
 
-export async function r1Check(root: string): Promise<CheckResult> {
+export async function r1Check(root: string, _options?: unknown): Promise<CheckResult> {
   let foundFile: string | null = null;
   let fileContent: string | null = null;
 

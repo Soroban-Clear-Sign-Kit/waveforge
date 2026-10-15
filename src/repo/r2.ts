@@ -5,7 +5,7 @@ import { fileExists, readTextFile } from "../util/fs.js";
 const PLACEHOLDER_REGEX = /\b(LIVE_DEMO_URL|LIVE_APP_URL|LIVE_API_URL|DEMO_VIDEO_URL|TODO|TBD)\b|lorem ipsum/i;
 const SETUP_HEADING_REGEX = /^#{1,6}\s+.*(install|quickstart|getting\s+started)/im;
 
-export async function r2Check(root: string): Promise<CheckResult> {
+export async function r2Check(root: string, _options?: unknown): Promise<CheckResult> {
   const candidateFiles = ["README.md", "readme.md"];
   let readmeFile: string | null = null;
   let content: string | null = null;

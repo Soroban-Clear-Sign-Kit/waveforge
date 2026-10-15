@@ -4,7 +4,7 @@ import yaml from "yaml";
 import type { CheckResult } from "../report.js";
 import { dirExists, readTextFile } from "../util/fs.js";
 
-export async function r5Check(root: string): Promise<CheckResult> {
+export async function r5Check(root: string, _options?: unknown): Promise<CheckResult> {
   const templatesDir = path.join(root, ".github", "ISSUE_TEMPLATE");
 
   if (!(await dirExists(templatesDir))) {

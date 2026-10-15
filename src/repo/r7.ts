@@ -5,7 +5,7 @@ export const r7Check = {
   title: "Soroban SDK Version Alignment",
   message: "Verify Soroban SDK versions across crates are aligned and supported.",
   fix: "Update Soroban SDK crate versions to match across workspaces.",
-  async run(): Promise<CheckItem> {
+  async run(_root?: string, _options?: unknown): Promise<CheckItem> {
     return {
       id: "R7",
       title: this.title,

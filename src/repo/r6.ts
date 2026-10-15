@@ -42,7 +42,7 @@ function hasTestRunStep(jobs: unknown): boolean {
   return false;
 }
 
-export async function r6Check(root: string): Promise<CheckResult> {
+export async function r6Check(root: string, _options?: unknown): Promise<CheckResult> {
   const workflowsDir = path.join(root, ".github", "workflows");
 
   if (!(await dirExists(workflowsDir))) {

@@ -11,6 +11,14 @@ import { r8Check } from "./r8.js";
 import { r9Check } from "./r9.js";
 import { r10Check } from "./r10.js";
 
+export type RepoCheck =
+  | ((root: string, options?: CheckOptions) => Promise<CheckResult>)
+  | {
+      id: string;
+      title: string;
+      run: (root?: string, options?: CheckOptions) => Promise<CheckResult>;
+    };
+
 export const repoChecks = [
   r1Check,
   r2Check,
@@ -28,11 +36,12 @@ export interface CheckOptions {
   offline?: boolean;
 }
 
-export async function runRepoChecks(repoPath: string, _options: CheckOptions = {}): Promise<Report> {
+export async function runRepoChecks(repoPath: string, options: CheckOptions = {}): Promise<Report> {
   const results: CheckResult[] = [];
 
   for (const check of repoChecks) {
-    const result: CheckResult = await check.run();
+    const result: CheckResult =
+      typeof check === "function" ? await check(repoPath, options) : await check.run(repoPath, options);
     results.push(result);
   }
 

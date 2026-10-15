@@ -5,7 +5,7 @@ export const r9Check = {
   title: "Environment and Secrets Safety",
   message: "Verify no raw secrets or private keys are committed in repository files.",
   fix: "Remove committed secret keys and mask any displayed keys as SXXXX...last4.",
-  async run(): Promise<CheckItem> {
+  async run(_root?: string, _options?: unknown): Promise<CheckItem> {
     return {
       id: "R9",
       title: this.title,
