@@ -93,6 +93,25 @@
   - Incremental `git commit` and `git push` runs: all succeeded
 - **Open issues**: None.
 
+## 2026-10-15 - Step 05
+- **What was built**:
+  - Defined report model and types in `src/report.ts` (`Status`, `CheckResult`, `Report`).
+  - Implemented `score(results)` calculating percentage (pass: 1, warn: 0.5, fail: 0, skipped: excluded, rounded percentage, empty/all-skipped: 0).
+  - Implemented formatters: `formatText` (aligned lines with PASS/WARN/FAIL/SKIP words, no emoji, fix hints), `formatMarkdown` (heading, score, table of non-pass results with fixes), and `formatJson`.
+  - Updated `src/repo/index.ts` and `src/issue/index.ts` to construct and return the new `Report` shape.
+  - Implemented CLI shell in `src/cli.ts` using `node:util` `parseArgs` (`repo`, `issue`, `init-action`, `--help`, `--version`, `--format`, `--min-score`, `--offline`) with exit codes: 0 (no fail and score >= min-score), 1 (any fail or below min-score), 2 (usage error or I/O error).
+  - Added unit and snapshot tests in `test/report.test.ts` for scoring and formatters.
+  - Added integration tests in `test/cli.test.ts` spawning `node dist/cli.js` across all commands and exit codes.
+  - Committed and pushed all changes incrementally one after the other.
+- **Commands run with results**:
+  - `pnpm build`: passed (compiled `dist/index.js`, `dist/cli.js`, `dist/index.d.ts`)
+  - `pnpm lint`: passed (0 errors, 0 warnings)
+  - `pnpm typecheck`: passed (0 errors)
+  - `pnpm test`: passed (36 tests passed across 5 test suites)
+  - Incremental `git commit` and `git push` runs: all succeeded
+- **Open issues**: None.
+
+
 
 
 
