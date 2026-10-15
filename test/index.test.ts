@@ -23,6 +23,8 @@ describe("waveforge scaffold", () => {
     expect(report.target).toBe(".");
     expect(report.results.length).toBe(10);
     expect(report.score).toBe(100);
+    expect(report.summary?.pass).toBe(10);
+    expect(report.summary?.total).toBe(10);
   });
 
   it("lints issue markdown returning report", async () => {
@@ -31,5 +33,7 @@ describe("waveforge scaffold", () => {
     expect(report.target).toBe("test.md");
     expect(report.results.length).toBe(11);
     expect(report.score).toBe(100);
+    expect(report.summary?.pass).toBe(11);
+    expect(report.summary?.total).toBe(11);
   });
 });

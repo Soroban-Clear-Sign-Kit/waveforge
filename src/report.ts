@@ -9,13 +9,36 @@ export interface CheckResult {
   evidence?: string[];
 }
 
+export interface ReportSummary {
+  pass: number;
+  warn: number;
+  fail: number;
+  skipped: number;
+  total: number;
+}
+
 export interface Report {
   kind: "repo" | "issue";
   target: string;
   score: number;
   results: CheckResult[];
   generatedAt: string;
+  summary?: ReportSummary;
   meta?: Record<string, string>;
+}
+
+export function summarizeResults(results: CheckResult[]): ReportSummary {
+  let pass = 0;
+  let warn = 0;
+  let fail = 0;
+  let skipped = 0;
+  for (const r of results) {
+    if (r.status === "pass") pass++;
+    else if (r.status === "warn") warn++;
+    else if (r.status === "fail") fail++;
+    else if (r.status === "skipped") skipped++;
+  }
+  return { pass, warn, fail, skipped, total: results.length };
 }
 
 // Backward-compatibility aliases

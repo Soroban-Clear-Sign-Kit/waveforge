@@ -1,5 +1,5 @@
 import type { CheckResult, Report } from "../report.js";
-import { score } from "../report.js";
+import { score, summarizeResults } from "../report.js";
 import { r1Check } from "./r1.js";
 import { r2Check } from "./r2.js";
 import { r3Check } from "./r3.js";
@@ -50,6 +50,7 @@ export async function runRepoChecks(repoPath: string, options: CheckOptions = {}
     target: repoPath,
     score: score(results),
     results,
+    summary: summarizeResults(results),
     generatedAt: new Date().toISOString(),
   };
 }

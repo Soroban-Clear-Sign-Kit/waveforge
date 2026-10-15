@@ -1,5 +1,5 @@
 import type { CheckResult, Report } from "../report.js";
-import { score } from "../report.js";
+import { score, summarizeResults } from "../report.js";
 import { issueRules } from "./rules.js";
 
 export async function lintIssueMarkdown(filePath: string, _content: string): Promise<Report> {
@@ -23,6 +23,7 @@ export async function lintIssueMarkdown(filePath: string, _content: string): Pro
     target: filePath,
     score: score(results),
     results,
+    summary: summarizeResults(results),
     generatedAt: new Date().toISOString(),
   };
 }
