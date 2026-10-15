@@ -77,5 +77,33 @@ waveforge init-action
 
 ---
 
+## Programmatic Library API
+
+`waveforge-stellar` exports a full TypeScript library API for programmatic use in custom scripts, test harnesses, or CI pipelines:
+
+```typescript
+import {
+  runRepoChecks,
+  lintIssueMarkdown,
+  repoChecks,
+  issueRules,
+  type Report,
+} from "waveforge-stellar";
+
+// 1. Run repository checks
+const repoReport: Report = await runRepoChecks("./my-soroban-repo", {
+  offline: false,
+});
+
+console.log(`Passed: ${repoReport.summary.pass}/${repoReport.summary.total}`);
+
+// 2. Lint issue markdown
+const issueReport: Report = await lintIssueMarkdown("issue.md", "# Test Issue");
+console.log(`Checks total: ${issueReport.summary.total}`);
+```
+
+---
+
 [Contributing](CONTRIBUTING.md) · [Security Policy](SECURITY.md) · [License](LICENSE) · [Stellar Wave Documentation](https://docs.drips.network/wave)
+
 
