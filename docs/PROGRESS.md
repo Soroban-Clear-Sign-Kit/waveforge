@@ -21,5 +21,23 @@
   - `pnpm lint`: succeeded (0 errors, 0 warnings)
   - `pnpm typecheck`: succeeded (0 errors)
   - `pnpm test`: succeeded (4 tests passed)
-  - `pnpm test:coverage`: succeeded (100% statements, 100% funcs, 100% lines)
 - **Open issues**: None.
+
+## 2026-10-15 - Roadmap Alignment and Documentation Expansion
+- **What was built**:
+  - Aligned repository documentation with the WaveForge roadmap.
+  - Expanded `README.md` incrementally into a comprehensive guide:
+    - Overview, badges, and project metadata.
+    - Ecosystem boundaries and repository scope comparison (`waveforge` vs `waveforge-action`).
+    - Multi-manager installation instructions (`pnpm`, `npm`, `yarn`, global, `npx`/`pnpm dlx`).
+    - CLI Command Reference (`repo`, `issue`, `init-action`) and flags (`--offline`).
+    - Programmatic TypeScript Library API usage examples.
+    - Detailed reference tables for Repository Readiness Checks (R1–R10) with validation goals and fixes.
+    - Detailed reference tables for Issue Linting Rules (I1–I7, S1–S3, F1) covering standard markdown, smart contract architecture, and frontmatter.
+    - Full WaveForge Roadmap across milestones (`v0.1.0` Foundation, `v0.2.0` More Checks, `v0.3.0` Integrations, `v1.0.0` Stable).
+    - Explicit out-of-scope declarations and contributing/maintenance guidelines.
+  - Pushed all updates incrementally commit-by-commit to maintain a granular git history.
+- **Commands run with results**:
+  - `git commit` & `git push` for each documentation increment (all passed).
+- **Open issues**: None.
+
