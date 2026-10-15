@@ -52,7 +52,29 @@
   - `pnpm typecheck`: succeeded (0 errors)
   - `pnpm test`: succeeded (5 tests passed across 2 suites)
   - `pnpm test:coverage`: succeeded (100% statements, 100% funcs, 100% lines)
-  - `pnpm build`: succeeded (ESM bundle + types generated in `dist/`)
 - **Open issues**: None.
+
+## 2026-10-15 - Step 03
+- **What was built**:
+  - Updated `LICENSE` to Apache-2.0 with copyright "Copyright 2026 John Imeobong Abasiediedu", and updated `package.json` license field to `"Apache-2.0"`.
+  - Created `SECURITY.md` detailing private vulnerability reporting, scope boundaries (read-only queries and Stellar RPC calls, never writes outside output), secret masking (`SXXXX...last4`), and offline safety.
+  - Created `CONTRIBUTING.md` containing all required sections in order:
+    a. Two-sentence summary of what waveforge does.
+    b. Setup instructions (Node 20, pnpm 9, install, build, test).
+    c. How to add a check (one file under `src/repo/`, id, fixture under `test/fixtures/repos/`, table-driven test, README row).
+    d. Scope boundary (`waveforge-action` ownership for GitHub Actions).
+    e. Branch and PR conventions (`issue-<number>-<short-name>`, one issue per PR, `Closes #n`).
+    f. Stellar Wave program guidelines (Drips Wave app, "Stellar Wave" label, applicant assignment, point complexity: Trivial 100, Medium 150, High 200, rewards shared after Wave, link https://docs.drips.network/wave without dollar amounts, wallets, or /claim commands).
+    g. Check rules restated from AGENTS.md.
+  - Updated `README.md` to stub "# WaveForge", one line description, and documentation links.
+  - Verified build, lint, typecheck, and tests, then committed and pushed each document one after the other.
+- **Commands run with results**:
+  - `pnpm build`: succeeded
+  - `pnpm lint`: succeeded (0 errors, 0 warnings)
+  - `pnpm typecheck`: succeeded (0 errors)
+  - `pnpm test`: succeeded (5 tests passed across 2 suites)
+  - Incremental `git commit` and `git push` runs: all succeeded
+- **Open issues**: None.
+
 
 
