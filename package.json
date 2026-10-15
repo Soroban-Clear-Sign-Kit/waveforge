@@ -1,6 +1,7 @@
 {
   "name": "waveforge-stellar",
   "version": "0.0.0",
+  "license": "Apache-2.0",
   "description": "Stellar Wave readiness checker and issue linter",
   "type": "module",
   "main": "./dist/index.js",
