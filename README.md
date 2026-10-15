@@ -104,6 +104,58 @@ console.log(`Checks total: ${issueReport.summary.total}`);
 
 ---
 
+## Repository Readiness Checks (R1–R10)
+
+Every check has an id, a title, a one-line message, and a fix. Network checks return `skipped` when `--offline` is set or the network is unreachable. Secrets are masked as `SXXXX...last4`.
+
+| ID | Title | What It Evaluates | Suggested Fix |
+| :--- | :--- | :--- | :--- |
+| **`R1`** | **Cargo.toml Soroban Configuration** | Verifies root or crate `Cargo.toml` exists and configures Soroban SDK dependencies. | Add or update `Cargo.toml` with `soroban-sdk` dependencies. |
+| **`R2`** | **Stellar Contract ID Verification** | Validates format and checksum of contract addresses documented in `README.md` or configs. | Correct any malformed contract IDs in documentation. |
+| **`R3`** | **Build and Test Automation** | Ensures automated build scripts or test workflows (`cargo test`) are configured. | Add scripts or GitHub Action steps to test contracts automatically. |
+| **`R4`** | **License Specification** | Verifies an open-source `LICENSE` file is present in the repository root. | Add a valid open-source license file (e.g., Apache-2.0). |
+| **`R5`** | **README Documentation** | Checks that `README.md` exists with clear project overview, setup, and instructions. | Expand `README.md` to document contract interfaces and usage. |
+| **`R6`** | **Git Configuration & Hygiene** | Verifies `.gitignore` exists and excludes secrets, build artifacts (`target/`), and `.env*`. | Update `.gitignore` with `target/`, `.env*`, and credential patterns. |
+| **`R7`** | **Soroban SDK Version Alignment** | Verifies that all workspace crates depend on aligned, supported versions of `soroban-sdk`. | Harmonize `soroban-sdk` versions across all workspace members. |
+| **`R8`** | **On-Chain Contract ID Check** | Queries Stellar testnet and mainnet RPC nodes to verify deployed contract code existence (returns `skipped` when offline). | Ensure contract IDs point to live, deployed contract instances on the network. |
+| **`R9`** | **Environment and Secrets Safety** | Scans repository files for committed secret keys (e.g., `S...` private keys) and verifies masking. | Remove exposed keys, revoke compromised credentials, and use `.env.example`. |
+| **`R10`** | **Stellar Wave Readiness Score** | Aggregates checks R1 through R9 into a unified readiness status for Wave qualification. | Resolve all failing prerequisite checks to achieve full Wave readiness. |
+
+---
+
+## Issue Linting Rules (I1–I7, S1–S3, F1)
+
+Before issues are submitted to a Stellar Wave reward pool, `waveforge issue` verifies markdown structure and technical depth:
+
+### Standard Issue Rules (I1–I7)
+
+| Rule | Title | Requirement | Fix |
+| :--- | :--- | :--- | :--- |
+| **`I1`** | **Issue Title Format** | Title must clearly describe the deliverable with standard prefixes (`feat:`, `fix:`, etc.). | Prefix title with an informative type and concise description. |
+| **`I2`** | **Problem Statement** | Issue must contain a `## Problem Statement` section detailing motivation and context. | Add a section explaining the problem or opportunity. |
+| **`I3`** | **Proposed Solution** | Issue must include a `## Proposed Solution` section outlining technical approach. | Detail architectural changes or functions to implement. |
+| **`I4`** | **Acceptance Criteria** | Issue must specify a Markdown checklist (`- [ ]`) under `## Acceptance Criteria`. | Add actionable, verifiable verification checklist items. |
+| **`I5`** | **Scope and Boundaries** | Issue must explicitly outline in-scope deliverables and out-of-scope non-goals. | Add `## Scope` declaring clear boundaries. |
+| **`I6`** | **Testing Plan** | Issue must explain how the change will be tested (unit tests, integration tests). | Add `## Testing Plan` with verification steps. |
+| **`I7`** | **Dependencies and Blockers** | Issue must identify upstream PRs, crates, or contracts required (or state `None`). | Add `## Dependencies` section. |
+
+### Stellar & Smart Contract Specific Rules (S1–S3)
+
+| Rule | Title | Requirement | Fix |
+| :--- | :--- | :--- | :--- |
+| **`S1`** | **Stellar Ecosystem Alignment** | Issue must identify specific relevance to Soroban, Stellar protocols, or Wave tracks. | Detail how this work furthers Stellar ecosystem goals. |
+| **`S2`** | **Smart Contract Architecture** | Contract alterations must specify interfaces, storage entry types, and auth requirements. | Document auth checks (`require_auth`) and ledger storage strategy. |
+| **`S3`** | **Security and Audit Impact** | Identifies potential security implications or audit needs. | Include a security impact summary or state why risk is minimal. |
+
+### Formatting Rule (F1)
+
+| Rule | Title | Requirement | Fix |
+| :--- | :--- | :--- | :--- |
+| **`F1`** | **Frontmatter Validity** | If YAML frontmatter (`---`) is included, it must parse cleanly without syntax errors. | Correct frontmatter YAML formatting and indentation. |
+
+---
+
 [Contributing](CONTRIBUTING.md) · [Security Policy](SECURITY.md) · [License](LICENSE) · [Stellar Wave Documentation](https://docs.drips.network/wave)
+
 
 
