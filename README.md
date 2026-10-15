@@ -84,3 +84,96 @@ npx waveforge-stellar repo .
 # or
 pnpm dlx waveforge-stellar repo .
 ```
+
+---
+
+## CLI Usage
+
+The `waveforge` CLI provides three primary commands: `repo`, `issue`, and `init-action`.
+
+### 1. Repository Readiness (`waveforge repo`)
+
+Evaluates the target Soroban/Stellar repository against all checks R1 through R10.
+
+```bash
+# Check current directory
+waveforge repo .
+
+# Check specific path
+waveforge repo /path/to/soroban-project
+
+# Run in offline mode (network verification skipped gracefully)
+waveforge repo . --offline
+```
+
+**Options**:
+- `[path]` *(optional)*: Path to the root of the Soroban project (defaults to current directory `.`).
+- `--offline` *(optional)*: Skips network calls (e.g., RPC queries for on-chain contract verification) and flags them as `skipped` instead of failing.
+
+### 2. Issue Markdown Linter (`waveforge issue`)
+
+Lints an issue description in Markdown format before posting to GitHub or applying to a Stellar Wave on Drips.
+
+```bash
+# Lint an issue draft
+waveforge issue ./docs/issues/001-soroban-token.md
+```
+
+**Validation includes**:
+- Title formatting and clarity (I1)
+- Explicit problem statement and proposed solution (I2, I3)
+- Verifiable acceptance criteria checklist (I4)
+- Clear in-scope / out-of-scope boundaries (I5)
+- Testing strategy and dependency declarations (I6, I7)
+- Stellar/Soroban alignment and smart contract authorization considerations (S1–S3)
+- Frontmatter metadata validation (F1)
+
+### 3. Bootstrap CI Workflow (`waveforge init-action`)
+
+Prepares or verifies the GitHub Action configuration for your repository:
+
+```bash
+waveforge init-action
+```
+
+---
+
+## Programmatic Library API
+
+`waveforge-stellar` exports a full TypeScript library API for programmatic use in custom scripts, test harnesses, or CI pipelines.
+
+```typescript
+import {
+  runRepoChecks,
+  lintIssueMarkdown,
+  repoChecks,
+  issueRules,
+  type Report,
+  type CheckItem,
+} from "waveforge-stellar";
+
+// 1. Run repository checks
+const repoReport: Report = await runRepoChecks("./my-soroban-repo", {
+  offline: false,
+});
+
+console.log(`Passed: ${repoReport.summary.pass}/${repoReport.summary.total}`);
+if (repoReport.summary.fail > 0) {
+  console.error("Repository readiness checks failed!");
+}
+
+// 2. Lint an issue description
+const markdownContent = `
+# Add Soroban Token Contract
+## Problem Statement
+We need a standard NEP-style or SEP token.
+## Acceptance Criteria
+- [ ] Implement token interface
+- [ ] Unit tests passing
+`;
+
+const issueReport: Report = await lintIssueMarkdown("issue.md", markdownContent);
+for (const check of issueReport.checks) {
+  console.log(`[${check.status.toUpperCase()}] ${check.id} - ${check.title}`);
+}
+```
