@@ -1,59 +1,188 @@
+import { parseArgs } from "node:util";
 import process from "node:process";
+import fs from "node:fs";
+import path from "node:path";
 import { runRepoChecks } from "./repo/index.js";
 import { lintIssueMarkdown } from "./issue/index.js";
-import { readTextFile } from "./util/fs.js";
+import { formatText, formatMarkdown, formatJson, type Report } from "./report.js";
 
-const args = process.argv.slice(2);
-const command = args[0];
+function getPackageVersion(): string {
+  try {
+    const pkgPath = new URL("../package.json", import.meta.url);
+    const content = fs.readFileSync(pkgPath, "utf-8");
+    const parsed = JSON.parse(content) as { version?: string };
+    return parsed.version ?? "0.0.0";
+  } catch {
+    return "0.0.0";
+  }
+}
 
 function printHelp(): void {
   console.log(`waveforge - Stellar Wave readiness checker and issue linter
 
 Usage:
-  waveforge repo [path] [--offline]
-  waveforge issue <path>
+  waveforge repo [path] [--offline] [--format=text|markdown|json] [--min-score=N]
+  waveforge issue <path> [--format=text|markdown|json] [--min-score=N]
   waveforge init-action
   waveforge --help
+  waveforge --version
+
+Options:
+  -h, --help        Show this help message
+  -v, --version     Show version number
+  --offline         Skip network calls and mark network checks as skipped
+  --format=<fmt>    Output format: text (default), markdown, or json
+  --min-score=<N>   Minimum required score (0-100) to pass
 `);
 }
 
-async function main(): Promise<void> {
-  if (!command || command === "--help" || command === "-h") {
-    printHelp();
-    process.exit(0);
+function printFormattedReport(report: Report, format?: string): void {
+  switch (format) {
+    case "json":
+      console.log(formatJson(report));
+      break;
+    case "markdown":
+    case "md":
+      console.log(formatMarkdown(report));
+      break;
+    case "text":
+    default:
+      console.log(formatText(report));
+      break;
+  }
+}
+
+export async function main(argv: string[] = process.argv.slice(2)): Promise<number> {
+  let parsedArgs: ReturnType<typeof parseArgs>;
+  try {
+    parsedArgs = parseArgs({
+      args: argv,
+      options: {
+        help: { type: "boolean", short: "h" },
+        version: { type: "boolean", short: "v" },
+        "min-score": { type: "string" },
+        format: { type: "string" },
+        offline: { type: "boolean", default: false },
+      },
+      allowPositionals: true,
+      strict: true,
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`Usage error: ${message}`);
+    return 2;
   }
 
+  const { values, positionals } = parsedArgs;
+
+  if (values.help) {
+    printHelp();
+    return 0;
+  }
+
+  if (values.version) {
+    console.log(`waveforge ${getPackageVersion()}`);
+    return 0;
+  }
+
+  const command = positionals[0];
+  if (!command) {
+    console.error("Usage error: missing command (repo, issue, init-action)");
+    printHelp();
+    return 2;
+  }
+
+  let minScoreThreshold: number | undefined;
+  if (values["min-score"] !== undefined) {
+    const parsed = Number(values["min-score"]);
+    if (Number.isNaN(parsed)) {
+      console.error("Usage error: --min-score must be a valid number");
+      return 2;
+    }
+    minScoreThreshold = parsed;
+  }
+
+  const format = typeof values.format === "string" ? values.format : undefined;
+  const offline = Boolean(values.offline);
+
   if (command === "repo") {
-    const repoPath = args[1] ?? ".";
-    const offline = args.includes("--offline");
-    const report = await runRepoChecks(repoPath, { offline });
-    console.log(JSON.stringify(report, null, 2));
-    process.exit(report.summary.fail > 0 ? 1 : 0);
+    const repoPath = positionals[1] ?? ".";
+    const resolvedPath = path.resolve(process.cwd(), repoPath);
+    if (!fs.existsSync(resolvedPath)) {
+      console.error(`I/O error: target path not found: ${repoPath}`);
+      return 2;
+    }
+
+    try {
+      const report = await runRepoChecks(repoPath, { offline });
+      printFormattedReport(report, format);
+
+      const hasFail = report.results.some((r) => r.status === "fail");
+      const belowMin = minScoreThreshold !== undefined && report.score < minScoreThreshold;
+
+      return hasFail || belowMin ? 1 : 0;
+    } catch (err) {
+      console.error(`I/O error: failed to analyze repository: ${err instanceof Error ? err.message : String(err)}`);
+      return 2;
+    }
   }
 
   if (command === "issue") {
-    const issuePath = args[1];
+    const issuePath = positionals[1];
     if (!issuePath) {
-      console.error("Error: issue command requires a file path");
-      process.exit(1);
+      console.error("Usage error: issue command requires a file path");
+      return 2;
     }
-    const content = (await readTextFile(issuePath)) ?? "";
-    const report = await lintIssueMarkdown(issuePath, content);
-    console.log(JSON.stringify(report, null, 2));
-    process.exit(report.summary.fail > 0 ? 1 : 0);
+
+    const resolvedPath = path.resolve(process.cwd(), issuePath);
+    if (!fs.existsSync(resolvedPath)) {
+      console.error(`I/O error: issue file not found: ${issuePath}`);
+      return 2;
+    }
+
+    let content = "";
+    try {
+      content = fs.readFileSync(resolvedPath, "utf-8");
+    } catch (err) {
+      console.error(`I/O error: could not read file ${issuePath}: ${err instanceof Error ? err.message : String(err)}`);
+      return 2;
+    }
+
+    try {
+      const report = await lintIssueMarkdown(issuePath, content);
+      printFormattedReport(report, format);
+
+      const hasFail = report.results.some((r) => r.status === "fail");
+      const belowMin = minScoreThreshold !== undefined && report.score < minScoreThreshold;
+
+      return hasFail || belowMin ? 1 : 0;
+    } catch (err) {
+      console.error(`I/O error: failed to lint issue: ${err instanceof Error ? err.message : String(err)}`);
+      return 2;
+    }
   }
 
   if (command === "init-action") {
-    console.log("init-action command ready");
-    process.exit(0);
+    console.log("GitHub Action workflow configuration initialized.");
+    return 0;
   }
 
-  console.error(`Unknown command: ${command}`);
+  console.error(`Usage error: unknown command '${command}'`);
   printHelp();
-  process.exit(1);
+  return 2;
 }
 
-main().catch((err: unknown) => {
-  console.error(err);
-  process.exit(1);
-});
+// Only invoke automatically when run as script
+const isMain = process.argv[1] !== undefined && (
+  process.argv[1].endsWith("cli.js") ||
+  process.argv[1].endsWith("cli.ts")
+);
+
+if (isMain) {
+  main().then((code) => {
+    process.exit(code);
+  }).catch((err: unknown) => {
+    console.error(`Fatal error: ${err instanceof Error ? err.message : String(err)}`);
+    process.exit(2);
+  });
+}
