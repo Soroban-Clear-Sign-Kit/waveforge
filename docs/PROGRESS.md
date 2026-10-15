@@ -73,8 +73,26 @@
   - `pnpm lint`: succeeded (0 errors, 0 warnings)
   - `pnpm typecheck`: succeeded (0 errors)
   - `pnpm test`: succeeded (5 tests passed across 2 suites)
+- **Open issues**: None.
+
+## 2026-10-15 - Step 04
+- **What was built**:
+  - Created `.github/ISSUE_TEMPLATE/config.yml` with `blank_issues_enabled: false`.
+  - Created `.github/ISSUE_TEMPLATE/bug.yml` with valid GitHub issue-form schema (what happened, expected behaviour, steps to reproduce, version; label `bug`).
+  - Created `.github/ISSUE_TEMPLATE/feature.yml` with valid GitHub issue-form schema (problem, proposed solution, required "Done when" checklist, files to touch; label `enhancement`).
+  - Created `.github/ISSUE_TEMPLATE/spike.yml` with valid GitHub issue-form schema (question to answer, what to investigate, expected output; label `spike`).
+  - Created `.github/ISSUE_TEMPLATE/new-check.yml` with valid GitHub issue-form schema (check id proposal, what it detects, why it matters for Wave contributors, passing and failing examples, "Done when" checklist; label `new-check`).
+  - Created `.github/pull_request_template.md` with "Closes #", summary, test evidence, and checklist (tests added, lint clean, typecheck clean, docs updated).
+  - Added automated unit tests in `test/templates.test.ts` parsing every YAML issue form and verifying structure.
+  - Committed and pushed each template and test file incrementally one after the other.
+- **Commands run with results**:
+  - YAML parse checks: all templates parsed cleanly
+  - `pnpm lint`: passed (0 errors, 0 warnings)
+  - `pnpm typecheck`: passed (0 errors)
+  - `pnpm test`: passed (11 tests passed across 3 suites)
   - Incremental `git commit` and `git push` runs: all succeeded
 - **Open issues**: None.
+
 
 
 
