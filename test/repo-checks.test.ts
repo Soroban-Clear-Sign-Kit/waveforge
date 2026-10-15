@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import path from "node:path";
 import { r1Check } from "../src/repo/r1.js";
 import { r2Check } from "../src/repo/r2.js";
+import { r3Check } from "../src/repo/r3.js";
+import { r4Check } from "../src/repo/r4.js";
 
 import type { CheckResult } from "../src/report.js";
 
@@ -82,3 +84,75 @@ describe("R2 - README check", () => {
     });
   }
 });
+
+describe("R3 - Contributing guidelines check", () => {
+  const cases = [
+    {
+      name: "passes on good repo with setup, test, and wave mention",
+      fixture: "good",
+      expectedStatus: "pass",
+    },
+    {
+      name: "fails when CONTRIBUTING.md is missing",
+      fixture: "missing-everything",
+      expectedStatus: "fail",
+      expectedMessageMatch: /CONTRIBUTING\.md does not exist/,
+    },
+    {
+      name: "fails and lists lines on prohibited bounty / claim keywords",
+      fixture: "bad-contributing",
+      expectedStatus: "fail",
+      verify(res: CheckResult) {
+        expect(res.evidence).toBeDefined();
+        expect(res.evidence!.length).toBeGreaterThan(0);
+        expect(res.evidence!.some((e: string) => e.includes("$500"))).toBe(true);
+        expect(res.evidence!.some((e: string) => e.includes("/claim"))).toBe(true);
+        expect(res.evidence!.some((e: string) => e.includes("paid on merge"))).toBe(true);
+      },
+    },
+  ];
+
+  for (const tc of cases) {
+    it(tc.name, async () => {
+      const root = path.join(FIXTURES_DIR, tc.fixture);
+      const res = await r3Check(root);
+      expect(res.id).toBe("R3");
+      expect(res.status).toBe(tc.expectedStatus);
+      if (tc.expectedMessageMatch) {
+        expect(res.message).toMatch(tc.expectedMessageMatch);
+      }
+      if (tc.verify) {
+        tc.verify(res);
+      }
+    });
+  }
+});
+
+describe("R4 - Security policy check", () => {
+  const cases = [
+    {
+      name: "passes when SECURITY.md exists",
+      fixture: "good",
+      expectedStatus: "pass",
+    },
+    {
+      name: "warns when SECURITY.md is missing",
+      fixture: "missing-everything",
+      expectedStatus: "warn",
+      expectedMessageMatch: /SECURITY\.md does not exist/,
+    },
+  ];
+
+  for (const tc of cases) {
+    it(tc.name, async () => {
+      const root = path.join(FIXTURES_DIR, tc.fixture);
+      const res = await r4Check(root);
+      expect(res.id).toBe("R4");
+      expect(res.status).toBe(tc.expectedStatus);
+      if (tc.expectedMessageMatch) {
+        expect(res.message).toMatch(tc.expectedMessageMatch);
+      }
+    });
+  }
+});
+
