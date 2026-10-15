@@ -234,3 +234,75 @@ Before issues are submitted to a Stellar Wave reward pool, `waveforge issue` ver
 | :--- | :--- | :--- | :--- |
 | **`F1`** | **Frontmatter Validity** | If YAML frontmatter (`---`) is included, it must parse cleanly without syntax errors. | Correct frontmatter YAML formatting and indentation. |
 
+---
+
+## Roadmap & Milestones
+
+The WaveForge roadmap outlines planned enhancements to catch more real problems in Soroban repositories and integrate cleanly across developer pipelines.
+
+### `v0.1.0` Foundation (Released)
+*Target: October 2026*
+
+Core foundation for repository and issue readiness.
+- [x] Repo checks R1 to R10, including Soroban CI and secret-seed detection
+- [x] On-chain contract ID check (R8) that never passes offline
+- [x] Issue rules I1 to I7, S1 to S3 and F1 with suggested complexity
+- [x] Text, Markdown and JSON reports; `init-action` command
+- [x] Published to npm (`waveforge-stellar`)
+
+### `v0.2.0` More Checks
+*Target: Q4 2026*
+
+Catch deeper, real-world edge cases in Soroban contract development.
+- [ ] **R11**: TTL-extension heuristic for contract code and persistent state (`High` complexity)
+- [ ] **R12**: `require_auth` presence check per state-changing function (spike first) (`High` complexity)
+- [ ] **R13**: Testnet deploy script presence verification (`Trivial` complexity)
+- [ ] Expanded issue-rule test fixtures derived from real Stellar Wave submissions (`Trivial` complexity)
+- [ ] Multi-language translated diagnostic messages (`Medium` complexity)
+
+### `v0.3.0` Integrations
+*Target: Q1 2027*
+
+Seamless integration with broader developer toolchains and CI systems.
+- [ ] **SARIF Output**: Native SARIF report generation for GitHub Code Scanning integration (`Medium` complexity)
+- [ ] **`--fix` Mode**: Automated remediation for missing template files and configuration stubs (`Medium` complexity)
+- [ ] **Go Repository Support**: Extend readiness checks for Go services interacting with Soroban (`go test`, `golangci-lint`) (`Medium` complexity)
+
+### `v1.0.0` Stable
+*Target: 2027*
+
+Long-term stability and ecosystem standard.
+- [ ] Frozen check IDs with a formalized deprecation policy
+- [ ] Stable library API with strict SemVer guarantees
+
+---
+
+## Out of Scope for This Repository
+
+To keep `waveforge` focused and lightweight, the following concerns are explicitly out of scope:
+- **GitHub Action Execution & Comments**: Running in GitHub Actions and posting PR comments or job summaries belongs to [`waveforge-action`](https://github.com/Soroban-Clear-Sign-Kit/waveforge-action).
+- **Web Dashboard Hosting**: No server, no database, no hosted web dashboards.
+- **Grant & Wave Approvals**: Deciding Wave approvals or distributing funds is exclusively the responsibility of Drips and Stellar Wave organizers.
+
+---
+
+## Contributing & Maintenance
+
+### How to Help
+- Roadmap items for the active milestone become GitHub issues tagged with a **"Done when"** checklist and an estimated complexity rating (`Trivial`, `Medium`, or `High`).
+- During an active **Stellar Wave**, issues carry the `Stellar Wave` label and can be applied for directly at [drips.network/wave](https://drips.network/wave).
+- Have a feature or check idea not listed on the roadmap? Please open an issue outlining the problem it solves and how it benefits Soroban developers.
+
+### How This Roadmap Is Maintained
+- **Targets are estimates, not promises**: Milestones shift dynamically based on ecosystem priorities and contributor bandwidth.
+- **Ticked upon release**: Roadmap checklist items are marked complete (`[x]`) only after their PR is merged and tagged in an official release.
+- **Synchronized updates**: Each release updates this roadmap and `CHANGELOG.md` in tandem.
+- **Architectural decisions**: Any scope or API modifications are logged in `docs/DECISIONS.md`.
+
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+
