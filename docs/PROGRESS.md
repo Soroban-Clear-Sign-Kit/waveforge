@@ -132,6 +132,37 @@
   - Incremental `git commit` and `git push`: all commits pushed one after the other
 - **Open issues**: None.
 
+## 2026-10-16 - Step 07: Soroban checks R7, R9, R10
+- **What was built**:
+  - Implemented `R7` (soroban):
+    - Recursively discovers `Cargo.toml` files (skipping `target`, `node_modules`, `.git`, `dist`, `fixtures`).
+    - Parses with `smol-toml` and detects `soroban-sdk` across dependency tables (`dependencies`, `dev-dependencies`, `build-dependencies`, `workspace.dependencies`, `target.*.dependencies`).
+    - Returns `skipped` ("No Soroban crates found.") if no Soroban crates detected.
+    - If detected, evidence lists crates and versions; fails if no CI workflow runs `cargo test`; warns if none runs `clippy`; warns if none runs `stellar contract build` / `soroban contract build`; warns if no contract crate has `#[cfg(test)]` or a `test.rs`.
+  - Implemented `R9` (wasm-target):
+    - Scans `README`, `docs/`, `scripts/`, `.github/`, and `Makefiles` for deprecated `wasm32-unknown-unknown` target.
+    - Warns with `file:line` evidence and fix hint pointing to `wasm32v1-none` (current Stellar CLI target).
+  - Implemented `R10` (secrets):
+    - Scans tracked files (`git ls-files` when root is a git repository, else directory walk skipping `node_modules`, `target`, `.git`, `dist`).
+    - Validates potential secret keys with `StrKey.isValidEd25519SecretSeed` from `@stellar/stellar-sdk`.
+    - Detects committed `.env` files other than `.env.example`.
+    - Masks all detected secret seeds as `SXXXX...last4` and guarantees full raw seeds never appear in output or formatters.
+  - Added test fixtures under `test/fixtures/repos/`:
+    - `soroban-good`: contract crate with `Cargo.toml`, `#[cfg(test)]`, and CI running `cargo test`, `clippy`, `stellar contract build`.
+    - `soroban-no-ci`: contract crate with `Cargo.toml` but no CI workflow.
+    - `old-target`: files containing `wasm32-unknown-unknown` in `README.md`, `Makefile`, `scripts/build.sh`, and `docs/build.md`.
+    - `leaked-seed`: dynamically generates random seeds at test setup with `Keypair.random()` without committing real secrets.
+  - Added unit, integration, and regression test suites in `test/repo-checks.test.ts` (65 tests total passing).
+  - Incremental commits pushed commit-by-commit to origin `main`.
+- **Commands run with results**:
+  - `pnpm build`: passed (TSUP compiled `dist/index.js`, `dist/cli.js`, and `dist/index.d.ts`)
+  - `pnpm lint`: passed (0 errors, 0 warnings across codebase)
+  - `pnpm typecheck`: passed (`tsc --noEmit` clean)
+  - `pnpm test`: passed (65 tests passed across 6 test suites)
+  - `pnpm test:coverage`: passed (89.23% lines, 86.72% statements)
+  - Incremental `git commit` & `git push` runs: all succeeded
+- **Open issues**: None.
+
 
 
 

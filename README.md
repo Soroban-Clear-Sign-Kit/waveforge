@@ -110,16 +110,16 @@ Every check has an id, a title, a one-line message, and a fix. Network checks re
 
 | ID | Title | What It Evaluates | Suggested Fix |
 | :--- | :--- | :--- | :--- |
-| **`R1`** | **Cargo.toml Soroban Configuration** | Verifies root or crate `Cargo.toml` exists and configures Soroban SDK dependencies. | Add or update `Cargo.toml` with `soroban-sdk` dependencies. |
-| **`R2`** | **Stellar Contract ID Verification** | Validates format and checksum of contract addresses documented in `README.md` or configs. | Correct any malformed contract IDs in documentation. |
-| **`R3`** | **Build and Test Automation** | Ensures automated build scripts or test workflows (`cargo test`) are configured. | Add scripts or GitHub Action steps to test contracts automatically. |
-| **`R4`** | **License Specification** | Verifies an open-source `LICENSE` file is present in the repository root. | Add a valid open-source license file (e.g., Apache-2.0). |
-| **`R5`** | **README Documentation** | Checks that `README.md` exists with clear project overview, setup, and instructions. | Expand `README.md` to document contract interfaces and usage. |
-| **`R6`** | **Git Configuration & Hygiene** | Verifies `.gitignore` exists and excludes secrets, build artifacts (`target/`), and `.env*`. | Update `.gitignore` with `target/`, `.env*`, and credential patterns. |
-| **`R7`** | **Soroban SDK Version Alignment** | Verifies that all workspace crates depend on aligned, supported versions of `soroban-sdk`. | Harmonize `soroban-sdk` versions across all workspace members. |
-| **`R8`** | **On-Chain Contract ID Check** | Queries Stellar testnet and mainnet RPC nodes to verify deployed contract code existence (returns `skipped` when offline). | Ensure contract IDs point to live, deployed contract instances on the network. |
-| **`R9`** | **Environment and Secrets Safety** | Scans repository files for committed secret keys (e.g., `S...` private keys) and verifies masking. | Remove exposed keys, revoke compromised credentials, and use `.env.example`. |
-| **`R10`** | **Stellar Wave Readiness Score** | Aggregates checks R1 through R9 into a unified readiness status for Wave qualification. | Resolve all failing prerequisite checks to achieve full Wave readiness. |
+| **`R1`** | **License Specification** | Verifies standard open-source license (`LICENSE`, `LICENSE.md`, `COPYING`). | Add an open-source license file (e.g. Apache-2.0 or MIT). |
+| **`R2`** | **README Documentation** | Checks `README.md` presence, Stellar/Soroban mention, setup heading, and flags placeholders. | Add or update `README.md` with setup instructions and remove placeholders. |
+| **`R3`** | **Contributing Guidelines** | Checks `CONTRIBUTING.md`, setup/testing instructions, Wave mention, and forbids dollar amounts or `/claim`. | Add `CONTRIBUTING.md` aligned with Stellar Wave contributor guidelines. |
+| **`R4`** | **Security Policy** | Checks that `SECURITY.md` exists with vulnerability reporting instructions. | Add a `SECURITY.md` file in repository root. |
+| **`R5`** | **Issue Templates** | Verifies YAML issue forms in `.github/ISSUE_TEMPLATE` and `config.yml` with `blank_issues_enabled: false`. | Add structured YAML issue forms in `.github/ISSUE_TEMPLATE/`. |
+| **`R6`** | **CI Workflow Automation** | Verifies `.github/workflows/` contains an automated workflow triggered on `pull_request` with a test step. | Add a GitHub Actions workflow with an automated test step on PRs. |
+| **`R7`** | **Soroban Contracts and CI** | Detects `Cargo.toml` with `soroban-sdk`; verifies CI runs `cargo test`, `clippy`, and `stellar contract build`, and verifies contract tests exist. | Configure Soroban contract testing, clippy, and build steps in CI workflows. |
+| **`R8`** | **On-Chain Contract Verification** | Verifies contract IDs documented in README exist on-chain via Stellar RPC (offline-safe: returns `skipped` when offline). | Ensure documented contract IDs are deployed on the target Stellar network. |
+| **`R9`** | **Wasm Compilation Target** | Scans docs and scripts for deprecated `wasm32-unknown-unknown` target. | Update `wasm32-unknown-unknown` to `wasm32v1-none` (current Stellar CLI target). |
+| **`R10`** | **Secret Key and Environment Safety** | Scans tracked files for Stellar secret seeds (`S...`) and committed `.env` files (except `.env.example`). | Remove committed secrets from git history and use `.env.example` placeholders. |
 
 ---
 
