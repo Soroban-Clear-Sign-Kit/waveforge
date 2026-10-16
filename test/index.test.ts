@@ -23,7 +23,8 @@ describe("waveforge scaffold", () => {
     expect(report.target).toBe(".");
     expect(report.results.length).toBe(10);
     expect(report.score).toBe(100);
-    expect(report.summary?.pass).toBe(10);
+    expect(report.summary?.pass).toBe(9);
+    expect(report.summary?.skipped).toBe(1);
     expect(report.summary?.total).toBe(10);
   });
 

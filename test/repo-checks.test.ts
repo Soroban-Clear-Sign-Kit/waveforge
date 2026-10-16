@@ -1,4 +1,6 @@
 import { describe, it, expect } from "vitest";
+import { promises as fs } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { r1Check } from "../src/repo/r1.js";
 import { r2Check } from "../src/repo/r2.js";
@@ -6,6 +8,7 @@ import { r3Check } from "../src/repo/r3.js";
 import { r4Check } from "../src/repo/r4.js";
 import { r5Check } from "../src/repo/r5.js";
 import { r6Check } from "../src/repo/r6.js";
+import { r7Check } from "../src/repo/r7.js";
 import { runRepoChecks } from "../src/repo/index.js";
 
 import type { CheckResult } from "../src/report.js";
@@ -213,6 +216,78 @@ describe("R6 - CI workflow check", () => {
       }
     });
   }
+});
+
+describe("R7 - Soroban check", () => {
+  it("passes on soroban-good with cargo test, clippy, stellar contract build, and contract tests", async () => {
+    const root = path.join(FIXTURES_DIR, "soroban-good");
+    const res = await r7Check(root);
+    expect(res.id).toBe("R7");
+    expect(res.status).toBe("pass");
+    expect(res.evidence).toBeDefined();
+    expect(res.evidence!.some((e) => e.includes("token-contract") && e.includes("22.0.0"))).toBe(true);
+  });
+
+  it("fails on soroban-no-ci when no CI workflow runs cargo test", async () => {
+    const root = path.join(FIXTURES_DIR, "soroban-no-ci");
+    const res = await r7Check(root);
+    expect(res.id).toBe("R7");
+    expect(res.status).toBe("fail");
+    expect(res.message).toMatch(/no CI workflow runs 'cargo test'/i);
+  });
+
+  it("skips on good repo when no Soroban crates exist", async () => {
+    const root = path.join(FIXTURES_DIR, "good");
+    const res = await r7Check(root);
+    expect(res.id).toBe("R7");
+    expect(res.status).toBe("skipped");
+    expect(res.message).toMatch(/no Soroban crates/i);
+  });
+
+  it("warns when cargo test runs but clippy is missing in CI", async () => {
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "waveforge-r7-clippy-"));
+    try {
+      await fs.writeFile(path.join(tmp, "Cargo.toml"), '[dependencies]\nsoroban-sdk = "22.0.0"\n');
+      const wfDir = path.join(tmp, ".github", "workflows");
+      await fs.mkdir(wfDir, { recursive: true });
+      await fs.writeFile(path.join(wfDir, "ci.yml"), "jobs:\n  t:\n    steps:\n      - run: cargo test\n");
+      const res = await r7Check(tmp);
+      expect(res.status).toBe("warn");
+      expect(res.message).toMatch(/no CI workflow runs clippy/i);
+    } finally {
+      await fs.rm(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it("warns when cargo test and clippy run but stellar contract build is missing", async () => {
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "waveforge-r7-build-"));
+    try {
+      await fs.writeFile(path.join(tmp, "Cargo.toml"), '[dependencies]\nsoroban-sdk = "22.0.0"\n');
+      const wfDir = path.join(tmp, ".github", "workflows");
+      await fs.mkdir(wfDir, { recursive: true });
+      await fs.writeFile(path.join(wfDir, "ci.yml"), "jobs:\n  t:\n    steps:\n      - run: cargo test\n      - run: cargo clippy\n");
+      const res = await r7Check(tmp);
+      expect(res.status).toBe("warn");
+      expect(res.message).toMatch(/no CI workflow runs 'stellar contract build'/i);
+    } finally {
+      await fs.rm(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it("warns when all CI steps exist but contract crate has no tests", async () => {
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "waveforge-r7-notests-"));
+    try {
+      await fs.writeFile(path.join(tmp, "Cargo.toml"), '[dependencies]\nsoroban-sdk = "22.0.0"\n');
+      const wfDir = path.join(tmp, ".github", "workflows");
+      await fs.mkdir(wfDir, { recursive: true });
+      await fs.writeFile(path.join(wfDir, "ci.yml"), "jobs:\n  t:\n    steps:\n      - run: cargo test\n      - run: cargo clippy\n      - run: stellar contract build\n");
+      const res = await r7Check(tmp);
+      expect(res.status).toBe("warn");
+      expect(res.message).toMatch(/no contract crate has #\[cfg\(test\)\]/i);
+    } finally {
+      await fs.rm(tmp, { recursive: true, force: true });
+    }
+  });
 });
 
 describe("runRepoChecks across fixtures", () => {
