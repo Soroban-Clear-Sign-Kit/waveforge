@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { promises as fs } from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { Keypair } from "@stellar/stellar-sdk";
 import { r1Check } from "../src/repo/r1.js";
 import { r2Check } from "../src/repo/r2.js";
 import { r3Check } from "../src/repo/r3.js";
@@ -10,7 +11,9 @@ import { r5Check } from "../src/repo/r5.js";
 import { r6Check } from "../src/repo/r6.js";
 import { r7Check } from "../src/repo/r7.js";
 import { r9Check } from "../src/repo/r9.js";
+import { r10Check } from "../src/repo/r10.js";
 import { runRepoChecks } from "../src/repo/index.js";
+import { formatText, formatMarkdown, formatJson } from "../src/report.js";
 
 import type { CheckResult } from "../src/report.js";
 
@@ -313,6 +316,87 @@ describe("R9 - Wasm target check", () => {
     expect(res.id).toBe("R9");
     expect(res.status).toBe("pass");
     expect(res.message).toMatch(/no references to deprecated target/i);
+  });
+});
+
+describe("R10 - Secrets and environment check", () => {
+  const leakedDir = path.join(FIXTURES_DIR, "leaked-seed");
+
+  it("passes on good fixture with no secrets or forbidden env files", async () => {
+    const root = path.join(FIXTURES_DIR, "good");
+    const res = await r10Check(root);
+    expect(res.id).toBe("R10");
+    expect(res.status).toBe("pass");
+    expect(res.message).toMatch(/no committed secret seeds/i);
+  });
+
+  it("allows .env.example without flagging as failure", async () => {
+    const res = await r10Check(leakedDir);
+    expect(res.id).toBe("R10");
+    expect(res.status).toBe("pass");
+  });
+
+  it("fails on leaked-seed fixture with generated seed, masks value, and never outputs raw seed", async () => {
+    const keypair = Keypair.random();
+    const rawSeed = keypair.secret();
+    const last4 = rawSeed.slice(-4);
+    const expectedMasked = `SXXXX...${last4}`;
+    const testSecretFile = path.join(leakedDir, "deploy_key.txt");
+
+    try {
+      await fs.writeFile(testSecretFile, `SECRET_KEY=${rawSeed}\n`);
+
+      const res = await r10Check(leakedDir);
+      expect(res.id).toBe("R10");
+      expect(res.status).toBe("fail");
+      expect(res.message).toMatch(/committed secrets/i);
+      expect(res.evidence).toBeDefined();
+
+      const secretEvidence = res.evidence!.find((e) => e.includes(expectedMasked));
+      expect(secretEvidence).toBeDefined();
+      expect(secretEvidence).toMatch(/deploy_key\.txt:1: SXXXX\.\.\./);
+
+      // Verify that the full raw seed NEVER appears anywhere in result
+      const serialized = JSON.stringify(res);
+      expect(serialized).not.toContain(rawSeed);
+      expect(res.message).not.toContain(rawSeed);
+      expect(res.fix ?? "").not.toContain(rawSeed);
+      for (const item of res.evidence!) {
+        expect(item).not.toContain(rawSeed);
+      }
+
+      // Verify formatters never output the full raw seed
+      const dummyReport = {
+        kind: "repo" as const,
+        target: leakedDir,
+        score: 0,
+        results: [res],
+        generatedAt: new Date().toISOString(),
+      };
+      const textOutput = formatText(dummyReport);
+      const markdownOutput = formatMarkdown(dummyReport);
+      const jsonOutput = formatJson(dummyReport);
+
+      expect(textOutput).not.toContain(rawSeed);
+      expect(markdownOutput).not.toContain(rawSeed);
+      expect(jsonOutput).not.toContain(rawSeed);
+      expect(jsonOutput).toContain(expectedMasked);
+    } finally {
+      await fs.rm(testSecretFile, { force: true });
+    }
+  });
+
+  it("fails on unpermitted committed .env file", async () => {
+    const envFile = path.join(leakedDir, ".env");
+    try {
+      await fs.writeFile(envFile, "FOO=bar\n");
+      const res = await r10Check(leakedDir);
+      expect(res.status).toBe("fail");
+      expect(res.evidence).toBeDefined();
+      expect(res.evidence!.some((e) => e.includes(".env:1: committed environment file"))).toBe(true);
+    } finally {
+      await fs.rm(envFile, { force: true });
+    }
   });
 });
 
