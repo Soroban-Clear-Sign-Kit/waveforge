@@ -9,6 +9,7 @@ import { r4Check } from "../src/repo/r4.js";
 import { r5Check } from "../src/repo/r5.js";
 import { r6Check } from "../src/repo/r6.js";
 import { r7Check } from "../src/repo/r7.js";
+import { r9Check } from "../src/repo/r9.js";
 import { runRepoChecks } from "../src/repo/index.js";
 
 import type { CheckResult } from "../src/report.js";
@@ -287,6 +288,31 @@ describe("R7 - Soroban check", () => {
     } finally {
       await fs.rm(tmp, { recursive: true, force: true });
     }
+  });
+});
+
+describe("R9 - Wasm target check", () => {
+  it("warns on old-target fixture with file:line evidence and hint", async () => {
+    const root = path.join(FIXTURES_DIR, "old-target");
+    const res = await r9Check(root);
+    expect(res.id).toBe("R9");
+    expect(res.status).toBe("warn");
+    expect(res.message).toMatch(/deprecated target 'wasm32-unknown-unknown'/i);
+    expect(res.fix).toMatch(/wasm32v1-none/);
+    expect(res.evidence).toBeDefined();
+    expect(res.evidence!.length).toBeGreaterThanOrEqual(4);
+    expect(res.evidence!.some((e) => e.startsWith("README.md:") && e.includes("wasm32-unknown-unknown"))).toBe(true);
+    expect(res.evidence!.some((e) => e.startsWith("Makefile:") && e.includes("wasm32-unknown-unknown"))).toBe(true);
+    expect(res.evidence!.some((e) => e.startsWith("scripts/build.sh:") && e.includes("wasm32-unknown-unknown"))).toBe(true);
+    expect(res.evidence!.some((e) => e.startsWith("docs/build.md:") && e.includes("wasm32-unknown-unknown"))).toBe(true);
+  });
+
+  it("passes on good fixture without deprecated target", async () => {
+    const root = path.join(FIXTURES_DIR, "good");
+    const res = await r9Check(root);
+    expect(res.id).toBe("R9");
+    expect(res.status).toBe("pass");
+    expect(res.message).toMatch(/no references to deprecated target/i);
   });
 });
 
