@@ -12,14 +12,18 @@ import { r9Check } from "./r9.js";
 import { r10Check } from "./r10.js";
 
 export type RepoCheck =
-  | ((root: string, options?: CheckOptions) => Promise<CheckResult>)
+  | (((root: string, options?: CheckOptions) => Promise<CheckResult>) & {
+      id: string;
+      title?: string;
+      run?: (root?: string, options?: CheckOptions) => Promise<CheckResult>;
+    })
   | {
       id: string;
       title: string;
       run: (root?: string, options?: CheckOptions) => Promise<CheckResult>;
     };
 
-export const repoChecks = [
+export const repoChecks: RepoCheck[] = [
   r1Check,
   r2Check,
   r3Check,
@@ -34,15 +38,24 @@ export const repoChecks = [
 
 export interface CheckOptions {
   offline?: boolean;
+  network?: string;
+  rpcUrl?: string;
+  rpc?: import("./r8.js").RpcClientLike;
+  sorobanCratesFound?: boolean;
 }
 
 export async function runRepoChecks(repoPath: string, options: CheckOptions = {}): Promise<Report> {
   const results: CheckResult[] = [];
+  const currentOptions = { ...options };
 
   for (const check of repoChecks) {
     const result: CheckResult =
-      typeof check === "function" ? await check(repoPath, options) : await check.run(repoPath, options);
+      typeof check === "function" ? await check(repoPath, currentOptions) : await check.run(repoPath, currentOptions);
     results.push(result);
+
+    if (result.id === "R7" && currentOptions.sorobanCratesFound === undefined) {
+      currentOptions.sorobanCratesFound = result.status !== "skipped";
+    }
   }
 
   return {

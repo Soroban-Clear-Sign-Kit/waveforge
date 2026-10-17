@@ -21,7 +21,7 @@ function printHelp(): void {
   console.log(`waveforge - Stellar Wave readiness checker and issue linter
 
 Usage:
-  waveforge repo [path] [--offline] [--format=text|markdown|json] [--min-score=N]
+  waveforge repo [path] [--network=<net>] [--rpc-url=<url>] [--offline] [--json] [--markdown] [--format=text|markdown|json] [--min-score=N]
   waveforge issue <path> [--format=text|markdown|json] [--min-score=N]
   waveforge init-action
   waveforge --help
@@ -30,7 +30,11 @@ Usage:
 Options:
   -h, --help        Show this help message
   -v, --version     Show version number
+  --network=<net>   Target Stellar network: testnet (default) or mainnet
+  --rpc-url=<url>   Explicit Soroban RPC URL (required for mainnet)
   --offline         Skip network calls and mark network checks as skipped
+  --json            Output report as JSON
+  --markdown        Output report as Markdown
   --format=<fmt>    Output format: text (default), markdown, or json
   --min-score=<N>   Minimum required score (0-100) to pass
 `);
@@ -63,6 +67,10 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
         "min-score": { type: "string" },
         format: { type: "string" },
         offline: { type: "boolean", default: false },
+        network: { type: "string", default: "testnet" },
+        "rpc-url": { type: "string" },
+        json: { type: "boolean", default: false },
+        markdown: { type: "boolean", default: false },
       },
       allowPositionals: true,
       strict: true,
@@ -102,8 +110,16 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
     minScoreThreshold = parsed;
   }
 
-  const format = typeof values.format === "string" ? values.format : undefined;
+  let format = typeof values.format === "string" ? values.format : undefined;
+  if (values.json) {
+    format = "json";
+  } else if (values.markdown) {
+    format = "markdown";
+  }
+
   const offline = Boolean(values.offline);
+  const network = typeof values.network === "string" ? values.network : "testnet";
+  const rpcUrl = typeof values["rpc-url"] === "string" ? values["rpc-url"] : undefined;
 
   if (command === "repo") {
     const repoPath = positionals[1] ?? ".";
@@ -114,7 +130,7 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
     }
 
     try {
-      const report = await runRepoChecks(repoPath, { offline });
+      const report = await runRepoChecks(repoPath, { offline, network, rpcUrl });
       printFormattedReport(report, format);
 
       const hasFail = report.results.some((r) => r.status === "fail");
