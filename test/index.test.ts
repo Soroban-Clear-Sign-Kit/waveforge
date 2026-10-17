@@ -30,12 +30,14 @@ describe("waveforge scaffold", () => {
   });
 
   it("lints issue markdown returning report", async () => {
-    const report = await lintIssueMarkdown("test.md", "# Test Issue");
+    const validContent = "# Test Issue\n\n## Description\nDetailed description explaining the issue in full context.\n\n## Requirements\n- Requirement 1\n\n## Done when\n- [ ] Task 1\n- [ ] Task 2\n\n## Files to touch\n- src/test.ts\n\n## Suggested execution\n1. Do it\n\nComplexity: Medium\n";
+    const report = await lintIssueMarkdown("test.md", validContent);
     expect(report.kind).toBe("issue");
     expect(report.target).toBe("test.md");
     expect(report.results.length).toBe(11);
     expect(report.score).toBe(100);
-    expect(report.summary?.pass).toBe(11);
+    expect(report.summary?.pass).toBe(7);
+    expect(report.summary?.skipped).toBe(4);
     expect(report.summary?.total).toBe(11);
   });
 });
