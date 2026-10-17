@@ -12,4 +12,7 @@
 | 2026-10-16 | R10 checks root .git directory before git ls-files | Prevents child fixtures from inheriting parent git repository index |
 | 2026-10-17 | Mainnet requires explicit --rpc-url | Stellar mainnet has no default public unauthenticated RPC endpoint; requests must supply --rpc-url or skip |
 | 2026-10-17 | R8 candidate discovery scope | Scans README.md and immediate *.md files in docs/ for \bC[A-Z2-7]{55}\b candidates |
+| 2026-10-17 | Issue rules S1-S3 and F1 conditional activation | S1-S3 return 'skipped' when text has no Soroban references; F1 returns 'skipped' when text has no UI/component references |
+| 2026-10-17 | Standard input support via '-' | 'waveforge issue -' reads from process.stdin to support shell pipeline integration |
+| 2026-10-17 | Complexity points mapping | Maps 100 points to Trivial, 150 points to Medium, and 200 points to High |
 

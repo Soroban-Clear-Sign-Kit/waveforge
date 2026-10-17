@@ -187,6 +187,38 @@
   - `pnpm test:coverage`: passed (89.08% lines, 86.78% statements)
 - **Open issues**: None.
 
+## 2026-10-17 - Step 09: Issue linter
+- **What was built**:
+  - Implemented issue rules I1–I7, Soroban rules S1–S3, and frontend rule F1 in `src/issue/rules.ts`:
+    - `I1` (context): fails if missing Description, Context or Background section, or opening paragraph is under 30 words.
+    - `I2` (requirements): warns if missing bulleted/numbered list under Requirements or "Requirements and context".
+    - `I3` (acceptance): fails if missing "Done when" or "Acceptance criteria" heading with at least 2 `- [ ]` checklist items.
+    - `I4` (files): warns if no file path (with `/` and extension or trailing `/`) and no "Files to touch" heading.
+    - `I5` (execution): warns if missing "Suggested execution" section or numbered steps.
+    - `I6` (complexity): warns if missing stated complexity or if stated complexity differs from suggested complexity.
+    - `I7` (scope): warns if >= 15 checklist items or >= 1,200 words.
+    - `S1-S3` (Soroban rules): conditional when text mentions `.rs`, `contracts/`, `soroban`, `require_auth` or `"smart contract"`:
+      - `S1`: fails if it does not specify who must authorize state changes (e.g. `require_auth`).
+      - `S2`: fails if contract tests are not required.
+      - `S3`: warns if `stellar contract build` or Wasm size check is missing.
+      - Skipped when non-Soroban.
+    - `F1` (Frontend rule): conditional when text mentions `.tsx`, `UI`, `page`, or `component`:
+      - `F1`: warns if screenshots or a screen recording are not requested.
+      - Skipped when non-UI.
+    - Calculated `suggestedComplexity` (High if > 8 items or mentions integration, architecture, refactor, contract storage; Trivial if <= 3 items and mentions typo, docs, copy, readme; else Medium), stored in `report.meta.suggestedComplexity`.
+  - Implemented `runIssueLint(markdown, options)` and `lintIssueMarkdown(filePath, content, options)` in `src/issue/index.ts`.
+  - Updated CLI command `waveforge issue <file|-> [--title] [--json] [--markdown] [--min-score]` with stdin (`-`) support and `--title` override in `src/cli.ts`.
+  - Added fixtures under `test/fixtures/issues/`: 3 good issues (`good-1.md`, `good-2.md`, `good-3.md`) and 5 bad issues (`bad-1` to `bad-5`).
+  - Added test suite `test/issue.test.ts` (31 tests) and updated `test/cli.test.ts` and `test/index.test.ts` (113 passed tests across 8 test files).
+- **Commands run with results**:
+  - `pnpm build`: passed (TSUP compiled `dist/index.js`, `dist/cli.js`, and `dist/index.d.ts`)
+  - `pnpm lint`: passed (0 errors, 0 warnings across codebase)
+  - `pnpm typecheck`: passed (`tsc --noEmit` clean with 0 errors)
+  - `pnpm test`: passed (113 passed, 1 skipped across 8 test suites)
+  - `pnpm test:coverage`: passed (90.15% lines, 87.97% statements, 95.03% lines in `src/issue`)
+- **Open issues**: None.
+
+
 
 
 

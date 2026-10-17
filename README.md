@@ -60,11 +60,24 @@ waveforge repo . --offline
 
 ### 2. Issue Markdown Linter (`waveforge issue`)
 
-Validates an issue Markdown file against rules I1–I7, S1–S3, and F1 before submitting to a Wave.
+Validates an issue Markdown file or standard input stream against rules I1–I7, S1–S3, and F1 before submitting to a Wave reward pool. Computes suggested complexity and warns on divergences.
 
 ```bash
-# Lint an issue draft
+# Lint an issue draft file
 waveforge issue ./docs/issues/001-soroban-token.md
+
+# Lint an issue from standard input
+cat issue.md | waveforge issue -
+
+# Override or specify issue title
+waveforge issue ./issue.md --title="Add staking contract"
+
+# Output formatted JSON or Markdown report
+waveforge issue ./issue.md --json
+waveforge issue ./issue.md --markdown
+
+# Require a minimum score threshold
+waveforge issue ./issue.md --min-score=90
 ```
 
 ### 3. Initialize Action Workflow (`waveforge init-action`)
@@ -125,33 +138,35 @@ Every check has an id, a title, a one-line message, and a fix. Network checks re
 
 ## Issue Linting Rules (I1–I7, S1–S3, F1)
 
-Before issues are submitted to a Stellar Wave reward pool, `waveforge issue` verifies markdown structure and technical depth:
+Before issues are submitted to a Stellar Wave reward pool, `waveforge issue` verifies markdown structure, scope limits, and technical requirements:
 
 ### Standard Issue Rules (I1–I7)
 
-| Rule | Title | Requirement | Fix |
-| :--- | :--- | :--- | :--- |
-| **`I1`** | **Issue Title Format** | Title must clearly describe the deliverable with standard prefixes (`feat:`, `fix:`, etc.). | Prefix title with an informative type and concise description. |
-| **`I2`** | **Problem Statement** | Issue must contain a `## Problem Statement` section detailing motivation and context. | Add a section explaining the problem or opportunity. |
-| **`I3`** | **Proposed Solution** | Issue must include a `## Proposed Solution` section outlining technical approach. | Detail architectural changes or functions to implement. |
-| **`I4`** | **Acceptance Criteria** | Issue must specify a Markdown checklist (`- [ ]`) under `## Acceptance Criteria`. | Add actionable, verifiable verification checklist items. |
-| **`I5`** | **Scope and Boundaries** | Issue must explicitly outline in-scope deliverables and out-of-scope non-goals. | Add `## Scope` declaring clear boundaries. |
-| **`I6`** | **Testing Plan** | Issue must explain how the change will be tested (unit tests, integration tests). | Add `## Testing Plan` with verification steps. |
-| **`I7`** | **Dependencies and Blockers** | Issue must identify upstream PRs, crates, or contracts required (or state `None`). | Add `## Dependencies` section. |
+| Rule | Title | Requirement | Severity | Fix |
+| :--- | :--- | :--- | :--- | :--- |
+| **`I1`** | **Context and Description** | Must contain a `## Description`, `## Context`, or `## Background` section, or an opening paragraph of at least 30 words. | **Fail** | Add a context section or expand opening paragraph to >= 30 words. |
+| **`I2`** | **Requirements Specification** | Must contain a list under a `## Requirements` or `## Requirements and context` heading. | **Warn** | Add a bulleted or numbered requirements list. |
+| **`I3`** | **Acceptance Criteria** | Must contain a `## Done when` or `## Acceptance criteria` heading with at least 2 `- [ ]` checklist items. | **Fail** | Add a checklist with at least 2 actionable verification checkboxes. |
+| **`I4`** | **Files to Touch** | Must reference file paths (containing `/` and extension, or trailing `/`) or a `## Files to touch` heading. | **Warn** | Specify affected paths (e.g. `src/` or `src/index.ts`) or add a `Files to touch` section. |
+| **`I5`** | **Suggested Execution** | Must include a `## Suggested execution` section or numbered steps. | **Warn** | Add execution steps outlining implementation sequence. |
+| **`I6`** | **Complexity Estimation** | Must state complexity (`Trivial`, `Medium`, `High`, or `100`/`150`/`200` points) matching suggested complexity. | **Warn** | Align stated complexity with suggested scope assessment. |
+| **`I7`** | **Scope Limits** | Issue scope must remain under 15 checklist items and under 1,200 words. | **Warn** | Split large issues into smaller, focused tasks. |
 
 ### Stellar & Smart Contract Specific Rules (S1–S3)
+*Active when text references `.rs`, `contracts/`, `soroban`, `require_auth`, or `"smart contract"` (otherwise `skipped`)*
 
-| Rule | Title | Requirement | Fix |
-| :--- | :--- | :--- | :--- |
-| **`S1`** | **Stellar Ecosystem Alignment** | Issue must identify specific relevance to Soroban, Stellar protocols, or Wave tracks. | Detail how this work furthers Stellar ecosystem goals. |
-| **`S2`** | **Smart Contract Architecture** | Contract alterations must specify interfaces, storage entry types, and auth requirements. | Document auth checks (`require_auth`) and ledger storage strategy. |
-| **`S3`** | **Security and Audit Impact** | Identifies potential security implications or audit needs. | Include a security impact summary or state why risk is minimal. |
+| Rule | Title | Requirement | Severity | Fix |
+| :--- | :--- | :--- | :--- | :--- |
+| **`S1`** | **State Change Authorization** | Must specify who must authorize state changes (e.g. `require_auth`). | **Fail** | Document caller/admin authorization requirements. |
+| **`S2`** | **Contract Tests** | Must require automated contract tests (e.g. `cargo test`, unit or integration tests). | **Fail** | Add automated test requirements for contract code. |
+| **`S3`** | **Contract Build and Size** | Should require `stellar contract build` or a Wasm size check. | **Warn** | Add build verification or Wasm size check steps. |
 
-### Formatting Rule (F1)
+### Frontend & UI Rule (F1)
+*Active when text references `.tsx`, `UI`, `page`, or `component` (otherwise `skipped`)*
 
-| Rule | Title | Requirement | Fix |
-| :--- | :--- | :--- | :--- |
-| **`F1`** | **Frontmatter Validity** | If YAML frontmatter (`---`) is included, it must parse cleanly without syntax errors. | Correct frontmatter YAML formatting and indentation. |
+| Rule | Title | Requirement | Severity | Fix |
+| :--- | :--- | :--- | :--- | :--- |
+| **`F1`** | **UI Visual Verification** | Must request screenshots or a screen recording in the PR. | **Warn** | Require screenshots or demo recordings for visual proof. |
 
 ---
 
