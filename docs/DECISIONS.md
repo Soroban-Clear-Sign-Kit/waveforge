@@ -10,4 +10,6 @@
 | 2026-10-15 | Pinned TypeScript 5.8.3 | typescript-eslint 8.71.2 requires typescript <6.1.0 |
 | 2026-10-16 | R7 skips fixtures directory when scanning root | Test fixtures in test/fixtures/ are mock repositories for testing, not workspace crates of waveforge itself |
 | 2026-10-16 | R10 checks root .git directory before git ls-files | Prevents child fixtures from inheriting parent git repository index |
+| 2026-10-17 | Mainnet requires explicit --rpc-url | Stellar mainnet has no default public unauthenticated RPC endpoint; requests must supply --rpc-url or skip |
+| 2026-10-17 | R8 candidate discovery scope | Scans README.md and immediate *.md files in docs/ for \bC[A-Z2-7]{55}\b candidates |
 

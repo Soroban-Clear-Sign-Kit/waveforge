@@ -163,6 +163,31 @@
   - Incremental `git commit` & `git push` runs: all succeeded
 - **Open issues**: None.
 
+## 2026-10-17 - Step 08: On-chain check R8 and the repo command
+- **What was built**:
+  - Implemented `R8` (contract-ids):
+    - Discovers contract ID candidates matching `\bC[A-Z2-7]{55}\b` across `README.md` and `docs/*.md`.
+    - Validates candidates with `StrKey.isValidContract`; invalid StrKey candidates produce `warn`.
+    - Supports `--network` (`testnet` default, using `https://soroban-testnet.stellar.org`; `mainnet` requiring explicit `--rpc-url`).
+    - Builds contract instance ledger key (`xdr.LedgerKey.contractData` with `xdr.LedgerKeyContractData`, `contract`, `xdr.ScVal.scvLedgerKeyContractInstance()`, and `xdr.ContractDataDurability.persistent`).
+    - Calls `getLedgerEntries` in a single batch with a 10s timeout.
+    - Evaluates each contract ID: live exists (evidence: Wasm hash hex or "Stellar Asset Contract"), not found (`fail`), archived (`warn`).
+    - Offline-safe: `--offline` or RPC failure returns `skipped` with reason.
+    - No IDs: returns `warn` when R7 detects Soroban crates, otherwise `skipped`.
+    - Accepts an injected RPC-like object (`rpc?: RpcClientLike`) for deterministic unit testing.
+  - Wired R1-R10 and new options into `runRepoChecks(root, options)` and CLI command `waveforge repo [path] [--network] [--rpc-url] [--offline] [--json] [--markdown] [--min-score]`.
+  - Added unit test suite in `test/r8.test.ts` with a fake RPC built from real XDR using SDK structures (`xdr.ScContractInstance`, `xdr.ContractExecutable`, `xdr.ContractDataEntry`, `xdr.LedgerEntryData`, `xdr.LedgerKey`).
+  - Added one integration test skipped unless `RUN_INTEGRATION=1` checking `TESTNET_CONTRACT_ID` from environment.
+  - Added CLI test cases covering `--network`, `--offline`, `--json`, and `--markdown`.
+- **Commands run with results**:
+  - `pnpm build`: passed (TSUP built `dist/index.js`, `dist/cli.js`, and `dist/index.d.ts`)
+  - `pnpm lint`: passed (0 errors, 0 warnings across codebase)
+  - `pnpm typecheck`: passed (`tsc --noEmit` clean with 0 errors)
+  - `pnpm test`: passed (79 tests passed, 1 skipped across 7 test suites)
+  - `pnpm test:coverage`: passed (89.08% lines, 86.78% statements)
+- **Open issues**: None.
+
+
 
 
 
