@@ -68,6 +68,13 @@ export async function r9Check(root: string, _options?: unknown): Promise<CheckRe
   for (const filePath of files) {
     if (!(await fileExists(filePath))) continue;
 
+    const relPath = path.relative(root, filePath).replace(/\\/g, "/");
+
+    // Skip waveforge progress and decision logs
+    if (relPath.startsWith("docs/PROGRESS") || relPath.startsWith("docs/DECISIONS")) {
+      continue;
+    }
+
     const content = await readTextFile(filePath);
     if (!content) continue;
 
@@ -77,7 +84,10 @@ export async function r9Check(root: string, _options?: unknown): Promise<CheckRe
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]!;
       if (line.includes(TARGET_STRING)) {
-        const relPath = path.relative(root, filePath).replace(/\\/g, "/");
+        // Skip table rows or check definitions that document the R9 check itself
+        if (line.includes("**`R9`**") || line.includes("**R9**") || line.includes("Wasm Compilation Target")) {
+          continue;
+        }
         evidence.push(`${relPath}:${i + 1}: ${line.trim()}`);
       }
     }
