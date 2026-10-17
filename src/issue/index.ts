@@ -1,31 +1,44 @@
-import type { CheckResult, Report } from "../report.js";
+import type { Report } from "../report.js";
 import { score, summarizeResults } from "../report.js";
-import { issueRules } from "./rules.js";
+import {
+  lintIssueRules,
+  type IssueLintOptions,
+  type ParsedIssue,
+  type IssueRule,
+} from "./rules.js";
 
-export async function lintIssueMarkdown(filePath: string, _content: string): Promise<Report> {
-  const results: CheckResult[] = [];
+export async function runIssueLint(
+  markdown: string,
+  options?: IssueLintOptions,
+): Promise<Report> {
+  const { results, parsed } = lintIssueRules(markdown, options);
 
-  for (const rule of issueRules) {
-    const item: CheckResult = rule.validate
-      ? await rule.validate(_content)
-      : {
-          id: rule.id,
-          title: rule.title,
-          message: rule.message,
-          fix: rule.fix,
-          status: "pass",
-        };
-    results.push(item);
+  const meta: Record<string, string> = {
+    title: parsed.title,
+    suggestedComplexity: parsed.suggestedComplexity,
+  };
+  if (parsed.statedComplexity) {
+    meta["statedComplexity"] = parsed.statedComplexity;
   }
 
   return {
     kind: "issue",
-    target: filePath,
+    target: options?.filePath ?? (options?.title ? options.title : "issue.md"),
     score: score(results),
     results,
     summary: summarizeResults(results),
     generatedAt: new Date().toISOString(),
+    meta,
   };
 }
 
+export async function lintIssueMarkdown(
+  filePath: string,
+  content: string,
+  options?: IssueLintOptions,
+): Promise<Report> {
+  return runIssueLint(content, { filePath, ...options });
+}
+
 export * from "./rules.js";
+export type { IssueLintOptions, ParsedIssue, IssueRule };
