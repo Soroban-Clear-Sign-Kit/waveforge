@@ -3,7 +3,7 @@ import process from "node:process";
 import fs from "node:fs";
 import path from "node:path";
 import { runRepoChecks } from "./repo/index.js";
-import { lintIssueMarkdown } from "./issue/index.js";
+import { runIssueLint } from "./issue/index.js";
 import { formatText, formatMarkdown, formatJson, type Report } from "./report.js";
 
 function getPackageVersion(): string {
@@ -22,7 +22,7 @@ function printHelp(): void {
 
 Usage:
   waveforge repo [path] [--network=<net>] [--rpc-url=<url>] [--offline] [--json] [--markdown] [--format=text|markdown|json] [--min-score=N]
-  waveforge issue <path> [--format=text|markdown|json] [--min-score=N]
+  waveforge issue <file|-> [--title=<title>] [--json] [--markdown] [--format=text|markdown|json] [--min-score=N]
   waveforge init-action
   waveforge --help
   waveforge --version
@@ -30,6 +30,7 @@ Usage:
 Options:
   -h, --help        Show this help message
   -v, --version     Show version number
+  --title=<title>   Issue title override
   --network=<net>   Target Stellar network: testnet (default) or mainnet
   --rpc-url=<url>   Explicit Soroban RPC URL (required for mainnet)
   --offline         Skip network calls and mark network checks as skipped
@@ -56,6 +57,14 @@ function printFormattedReport(report: Report, format?: string): void {
   }
 }
 
+async function readStdin(): Promise<string> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of process.stdin) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks).toString("utf-8");
+}
+
 export async function main(argv: string[] = process.argv.slice(2)): Promise<number> {
   let parsedArgs: ReturnType<typeof parseArgs>;
   try {
@@ -64,6 +73,7 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
       options: {
         help: { type: "boolean", short: "h" },
         version: { type: "boolean", short: "v" },
+        title: { type: "string" },
         "min-score": { type: "string" },
         format: { type: "string" },
         offline: { type: "boolean", default: false },
@@ -146,26 +156,42 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
   if (command === "issue") {
     const issuePath = positionals[1];
     if (!issuePath) {
-      console.error("Usage error: issue command requires a file path");
-      return 2;
-    }
-
-    const resolvedPath = path.resolve(process.cwd(), issuePath);
-    if (!fs.existsSync(resolvedPath)) {
-      console.error(`I/O error: issue file not found: ${issuePath}`);
+      console.error("Usage error: issue command requires a file path or '-' for stdin");
       return 2;
     }
 
     let content = "";
-    try {
-      content = fs.readFileSync(resolvedPath, "utf-8");
-    } catch (err) {
-      console.error(`I/O error: could not read file ${issuePath}: ${err instanceof Error ? err.message : String(err)}`);
-      return 2;
+    let targetName = issuePath;
+    const titleOption = typeof values.title === "string" ? values.title : undefined;
+
+    if (issuePath === "-") {
+      targetName = "stdin";
+      try {
+        content = await readStdin();
+      } catch (err) {
+        console.error(`I/O error: could not read from stdin: ${err instanceof Error ? err.message : String(err)}`);
+        return 2;
+      }
+    } else {
+      const resolvedPath = path.resolve(process.cwd(), issuePath);
+      if (!fs.existsSync(resolvedPath)) {
+        console.error(`I/O error: issue file not found: ${issuePath}`);
+        return 2;
+      }
+
+      try {
+        content = fs.readFileSync(resolvedPath, "utf-8");
+      } catch (err) {
+        console.error(`I/O error: could not read file ${issuePath}: ${err instanceof Error ? err.message : String(err)}`);
+        return 2;
+      }
     }
 
     try {
-      const report = await lintIssueMarkdown(issuePath, content);
+      const report = await runIssueLint(content, {
+        title: titleOption,
+        filePath: targetName,
+      });
       printFormattedReport(report, format);
 
       const hasFail = report.results.some((r) => r.status === "fail");

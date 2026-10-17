@@ -5,9 +5,10 @@ import path from "node:path";
 describe("CLI process exit codes", () => {
   const cliPath = path.resolve(process.cwd(), "dist/cli.js");
 
-  function runCli(args: string[]) {
+  function runCli(args: string[], input?: string) {
     return spawnSync(process.execPath, [cliPath, ...args], {
       encoding: "utf-8",
+      input,
     });
   }
 
@@ -47,7 +48,6 @@ describe("CLI process exit codes", () => {
   });
 
   it("exits with 1 when score is below --min-score", () => {
-    // Current stub repo score is 100, so min-score 101 will fail
     const res = runCli(["repo", ".", "--min-score=101"]);
     expect(res.status).toBe(1);
   });
@@ -65,13 +65,13 @@ describe("CLI process exit codes", () => {
   });
 
   it("exits with 2 on usage error (unknown option)", () => {
-    const res = runCli(["repo", "--invalid-option"]);
+    const res = runCli(["repo", "--invalid-flag"]);
     expect(res.status).toBe(2);
     expect(res.stderr).toContain("Usage error");
   });
 
   it("exits with 2 on usage error (invalid --min-score)", () => {
-    const res = runCli(["repo", ".", "--min-score=abc"]);
+    const res = runCli(["repo", ".", "--min-score=not-a-number"]);
     expect(res.status).toBe(2);
     expect(res.stderr).toContain("Usage error");
   });
@@ -95,9 +95,27 @@ describe("CLI process exit codes", () => {
   });
 
   it("exits with 0 on valid issue file", () => {
-    const res = runCli(["issue", "README.md"]);
+    const res = runCli(["issue", "test/fixtures/issues/good-1.md"]);
     expect(res.status).toBe(0);
     expect(res.stdout).toContain("PASS");
+  });
+
+  it("exits with 1 on issue with rule failures", () => {
+    const res = runCli(["issue", "test/fixtures/issues/bad-1-missing-context.md"]);
+    expect(res.status).toBe(1);
+    expect(res.stdout).toContain("FAIL");
+  });
+
+  it("supports issue reading from stdin with -", () => {
+    const validIssue = "# Stdin Issue\n\n## Description\nDetailed description of task.\n\n## Requirements\n- Step\n\n## Done when\n- [ ] Task A\n- [ ] Task B\n\n## Files to touch\n- src/test.ts\n\n## Suggested execution\n1. Do it\n\nComplexity: Medium\n";
+    const res = runCli(["issue", "-"], validIssue);
+    expect(res.status).toBe(0);
+    expect(res.stdout).toContain("WaveForge ISSUE Report");
+  });
+
+  it("supports issue --title option", () => {
+    const res = runCli(["issue", "test/fixtures/issues/good-1.md", "--title=Override Title"]);
+    expect(res.status).toBe(0);
   });
 
   it("supports --format=json and --format=markdown", () => {
