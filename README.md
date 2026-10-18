@@ -1,6 +1,6 @@
 # WaveForge
 
-> A CLI and TypeScript library that checks Soroban and Stellar repositories for Stellar Wave readiness, verifies README contract IDs on-chain, and lints issues before they enter a Wave.
+WaveForge is a TypeScript library and CLI tool that helps Soroban repository maintainers verify repository readiness and contributor workflows before participating in Stellar Wave reward pools. It inspects repository structure, CI workflows, and safety policies, and verifies on-chain that contract IDs documented in READMEs and docs exist on the target Stellar network.
 
 [![npm version](https://img.shields.io/npm/v/waveforge-stellar.svg)](https://www.npmjs.com/package/waveforge-stellar)
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
@@ -10,31 +10,24 @@
 
 ---
 
-## Where This Repository Fits
+## Quick Start
 
-This repository owns every check and rule. `waveforge-action` bundles this library to run it on GitHub.
-
-| Repository | Role | Description |
-| :--- | :--- | :--- |
-| **`waveforge`** | CLI, checks and library *(this repo)* | Core TypeScript engine owning checks R1–R10, issue rules I1–I7, S1–S3, F1, report formatters, and CLI. |
-| **`waveforge-action`** | GitHub Action | Pre-bundled GitHub Action that runs this library in CI workflows, creating comments and job summaries. |
-
----
-
-## Installation
+Run repository readiness checks immediately on any repository without prior installation:
 
 ```bash
-# As project dependency (pnpm)
-pnpm add -D waveforge-stellar
+npx waveforge-stellar repo .
+```
 
-# As project dependency (npm)
-npm install --save-dev waveforge-stellar
+You can also install WaveForge globally or as a project devDependency:
 
-# Global CLI
+```bash
+# Global install
 npm install -g waveforge-stellar
 
-# Or run directly via npx / pnpm dlx
-npx waveforge-stellar repo .
+# Or project dependency
+pnpm add -D waveforge-stellar
+# or
+npm install --save-dev waveforge-stellar
 ```
 
 ---
@@ -51,11 +44,22 @@ Evaluates the target Soroban/Stellar repository against all checks R1 through R1
 # Run readiness checks on the current repository
 waveforge repo .
 
-# Run on a specific path
+# Run on a specific repository path
 waveforge repo /path/to/soroban-project
 
 # Run offline (network checks return skipped instead of failing)
 waveforge repo . --offline
+
+# Specify target Stellar network and custom RPC endpoint
+waveforge repo . --network=testnet
+waveforge repo . --network=mainnet --rpc-url=https://mainnet.sorobanrpc.com
+
+# Format output as JSON or Markdown
+waveforge repo . --json
+waveforge repo . --markdown
+
+# Enforce a minimum score threshold (exits with 1 if below threshold)
+waveforge repo . --min-score=90
 ```
 
 ### 2. Issue Markdown Linter (`waveforge issue`)
@@ -97,57 +101,22 @@ waveforge init-action --force --ref=my-org/waveforge-action@v1
 
 ---
 
-## Programmatic Library API
-
-`waveforge-stellar` exports a minimal, deterministic TypeScript library API. See [docs/API.md](docs/API.md) for full specifications, options, and offline-safety guarantees.
-
-```typescript
-import {
-  runRepoChecks,
-  runIssueLint,
-  score,
-  formatText,
-  formatMarkdown,
-  formatJson,
-  type Status,
-  type CheckResult,
-  type Report,
-  type RepoOptions,
-  type IssueOptions,
-} from "waveforge-stellar";
-
-// 1. Run repository readiness checks
-const repoReport: Report = await runRepoChecks(".", {
-  offline: false,
-  network: "testnet",
-});
-console.log(formatText(repoReport));
-
-// 2. Lint issue markdown text
-const issueReport: Report = await runIssueLint(issueMarkdown, {
-  title: "Add liquidity contract",
-});
-console.log(`Issue Score: ${issueReport.score}%`);
-```
-
----
-
 ## Repository Readiness Checks (R1–R10)
 
 Every check has an id, a title, a one-line message, and a fix. Network checks return `skipped` when `--offline` is set or the network is unreachable. Secrets are masked as `SXXXX...last4`.
 
-| ID | Title | What It Evaluates | Suggested Fix |
-| :--- | :--- | :--- | :--- |
-| **`R1`** | **License Specification** | Verifies standard open-source license (`LICENSE`, `LICENSE.md`, `COPYING`). | Add an open-source license file (e.g. Apache-2.0 or MIT). |
-| **`R2`** | **README Documentation** | Checks `README.md` presence, Stellar/Soroban mention, setup heading, and flags placeholders. | Add or update `README.md` with setup instructions and remove placeholders. |
-| **`R3`** | **Contributing Guidelines** | Checks `CONTRIBUTING.md`, setup/testing instructions, Wave mention, and forbids dollar amounts or `/claim`. | Add `CONTRIBUTING.md` aligned with Stellar Wave contributor guidelines. |
-| **`R4`** | **Security Policy** | Checks that `SECURITY.md` exists with vulnerability reporting instructions. | Add a `SECURITY.md` file in repository root. |
-| **`R5`** | **Issue Templates** | Verifies YAML issue forms in `.github/ISSUE_TEMPLATE` and `config.yml` with `blank_issues_enabled: false`. | Add structured YAML issue forms in `.github/ISSUE_TEMPLATE/`. |
-| **`R6`** | **CI Workflow Automation** | Verifies `.github/workflows/` contains an automated workflow triggered on `pull_request` with a test step. | Add a GitHub Actions workflow with an automated test step on PRs. |
-| **`R7`** | **Soroban Contracts and CI** | Detects `Cargo.toml` with `soroban-sdk`; verifies CI runs `cargo test`, `clippy`, and `stellar contract build`, and verifies contract tests exist. | Configure Soroban contract testing, clippy, and build steps in CI workflows. |
-| **`R8`** | **On-Chain Contract Verification** | Verifies contract IDs documented in README exist on-chain via Stellar RPC (offline-safe: returns `skipped` when offline). | Ensure documented contract IDs are deployed on the target Stellar network. |
-| **`R9`** | **Wasm Compilation Target** | Scans docs and scripts for deprecated `wasm32-unknown-unknown` target. | Update `wasm32-unknown-unknown` to `wasm32v1-none` (current Stellar CLI target). |
-| **`R10`** | **Secret Key and Environment Safety** | Scans tracked files for Stellar secret seeds (`S...`) and committed `.env` files (except `.env.example`). | Remove committed secrets from git history and use `.env.example` placeholders. |
+| ID | What It Evaluates | Why It Matters for Wave Contributors |
+| :--- | :--- | :--- |
+| **`R1`** | **License Specification**: Standard open-source license (`LICENSE`, `LICENSE.md`, `COPYING`). | Ensures contributors and users have unambiguous open-source rights to view, fork, and build on code. |
+| **`R2`** | **README Documentation**: `README.md` presence, setup instructions, Stellar/Soroban mention, and absence of placeholder text. | Equips contributors with clear onboarding instructions to build, run, and understand project deliverables. |
+| **`R3`** | **Contributing Guidelines**: `CONTRIBUTING.md` with setup/testing guidance, Stellar Wave mention, and forbids dollar amounts or `/claim`. | Sets transparent expectations for task applications, review criteria, and Wave-compliant workflows without bounty haggling. |
+| **`R4`** | **Security Policy**: `SECURITY.md` presence with clear vulnerability reporting instructions. | Provides security researchers a responsible, private disclosure channel to report contract or code vulnerabilities. |
+| **`R5`** | **Issue Templates**: Structured YAML forms in `.github/ISSUE_TEMPLATE` and `config.yml` with `blank_issues_enabled: false`. | Guides contributors to file structured issues with actionable reproduction steps, expected behavior, and scope boundaries. |
+| **`R6`** | **CI Workflow Automation**: Automated GitHub Actions workflow triggered on `pull_request` with an automated test step. | Verifies contributor PRs automatically run test suites, catching regressions before maintainer review. |
+| **`R7`** | **Soroban Contracts and CI**: Detects `soroban-sdk` crates; verifies CI runs `cargo test`, `clippy`, and `stellar contract build`, and verifies contract tests exist. | Maintains high smart contract code quality, type safety, and verifiable compilation in CI pipelines. |
+| **`R8`** | **On-Chain Contract Verification**: Verifies contract IDs documented in README exist on-chain via Stellar RPC (offline-safe: returns `skipped` when offline). | Validates that contract addresses documented for contributors are live on-chain, preventing stale or phantom IDs. |
+| **`R9`** | **Wasm Compilation Target**: Scans docs and scripts for deprecated `wasm32-unknown-unknown` target. | Prevents broken builds and compilation mismatches by ensuring projects target current Stellar CLI standards (`wasm32v1-none`). |
+| **`R10`** | **Secret Key and Environment Safety**: Scans tracked files for Stellar secret seeds (`S...`) and committed `.env` files (except `.env.example`). | Protects repositories from leaked cryptographic credentials, compromised test accounts, and accidental secret commits. |
 
 ---
 
@@ -185,72 +154,36 @@ Before issues are submitted to a Stellar Wave reward pool, `waveforge issue` ver
 
 ---
 
-## Roadmap & Milestones
+## Programmatic Library API
 
-### `v0.1.0` Foundation (Released)
-*Target: October 2026*
+`waveforge-stellar` exports a minimal, deterministic TypeScript library API. See [docs/API.md](docs/API.md) for full specifications, options, and offline-safety guarantees.
 
-Everything the README documents today:
-- [x] Repo checks R1 to R10, including Soroban CI and secret-seed detection
-- [x] On-chain contract ID check (R8) that never passes offline
-- [x] Issue rules I1 to I7, S1 to S3 and F1 with suggested complexity
-- [x] Text, Markdown and JSON reports; `init-action` command
-- [x] Published to npm (`waveforge-stellar`)
+```typescript
+import { runRepoChecks, runIssueLint, score, formatText } from "waveforge-stellar";
 
-### `v0.2.0` More Checks
-*Target: Q4 2026*
+// 1. Run repository readiness checks
+const repoReport = await runRepoChecks(".", { network: "testnet" });
+console.log(formatText(repoReport));
 
-Catch more real problems in Soroban repos:
-- [ ] **R11**: TTL-extension heuristic for contract code (`High` complexity)
-- [ ] **R12**: `require_auth` presence per state-changing function (spike first) (`High` complexity)
-- [ ] **R13**: Testnet deploy script present (`Trivial` complexity)
-- [ ] More issue-rule fixtures from real Stellar Wave issues (`Trivial` complexity)
-- [ ] Translated messages (`Medium` complexity)
-
-### `v0.3.0` Integrations
-*Target: Q1 2027*
-
-Plug into more toolchains:
-- [ ] **SARIF Output**: Native SARIF output for GitHub code scanning (`Medium` complexity)
-- [ ] **`--fix` Mode**: `--fix` mode for template files (`Medium` complexity)
-- [ ] **Go Repository Support**: Go repository support (`go test`, `golangci-lint`) (`Medium` complexity)
-
-### `v1.0.0` Stable
-*Target: 2027*
-
-Stable check IDs and library API:
-- [ ] Frozen check IDs with a deprecation policy
-- [ ] Stable library API with semver guarantees
+// 2. Lint issue markdown text
+const issueReport = await runIssueLint(issueMarkdown, { title: "Issue Title" });
+console.log(`Issue Score: ${issueReport.score}% (Status: ${score(issueReport.results)}%)`);
+```
 
 ---
 
-## Out of Scope for This Repository
+## Exit Codes
 
-- **The GitHub Action, comments and job summaries**: Owned by [`waveforge-action`](https://github.com/Soroban-Clear-Sign-Kit/waveforge-action).
-- **Hosting a web dashboard**: waveforge is a CLI and library without a hosted server or database.
-- **Deciding Wave approvals**: That is the organizers' call.
-
----
-
-## How to Help
-
-- Roadmap items for the current milestone become GitHub issues with a **"Done when"** checklist and a complexity (**Trivial**, **Medium** or **High**).
-- During a Stellar Wave, these issues carry the `Stellar Wave` label and you can apply for them at [drips.network/wave](https://drips.network/wave). Read [CONTRIBUTING.md](CONTRIBUTING.md) first.
-- Want something that is not listed? Open a feature issue with the problem it solves. Items move between milestones based on contributor interest and maintainer review.
+- **`0`**: Success — all checks passed, or readiness score meets `--min-score` with zero failures.
+- **`1`**: Check Failure — one or more checks failed, or report score is below `--min-score`.
+- **`2`**: Usage or I/O Error — missing command, invalid CLI options, or file/directory not found.
 
 ---
 
-## How This Roadmap Is Maintained
+## Limitations
 
-- Targets are estimates, not promises.
-- An item is ticked only when its PR is merged and released.
-- Each release updates this file and `CHANGELOG.md` together.
-- Scope changes are recorded in `docs/DECISIONS.md`.
+WaveForge provides automated heuristics to assist maintainers and contributors in preparing repositories and issues. Passing WaveForge checks does not guarantee acceptance, funding, or rewards; official evaluation and approval decisions remain solely with Stellar Wave organizers.
 
 ---
 
-[Contributing](CONTRIBUTING.md) · [Security Policy](SECURITY.md) · [License](LICENSE) · [Stellar Wave Documentation](https://docs.drips.network/wave)
-
-
-
-
+Related repositories: waveforge-action
