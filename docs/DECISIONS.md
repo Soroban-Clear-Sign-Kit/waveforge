@@ -18,4 +18,6 @@
 | 2026-10-18 | Public API exact export boundary | src/index.ts exports only runRepoChecks, runIssueLint, score, formatText, formatMarkdown, formatJson, and types Status, CheckResult, Report, RepoOptions, IssueOptions; internals remain private |
 | 2026-10-18 | init-action workflow structure | Writes single .github/workflows/waveforge.yml with two distinct jobs: waveforge-repo (on pull_request/workflow_dispatch, contents: read) and waveforge-issue (on issues [opened, edited], issues: write) |
 | 2026-10-18 | init-action default ref | Read from package.json waveforge.actionRef (defaults to Soroban-Clear-Sign-Kit/waveforge-action@v1) |
+| 2026-10-18 | Package distribution whitelist | package.json 'files' field restricted to dist, README.md, LICENSE; confirmed with npm pack --dry-run |
+| 2026-10-18 | Pre-release isolated installation verification | Verified tarball installation and CLI/API execution in isolated external temp directory prior to release tagging |
 

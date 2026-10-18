@@ -242,6 +242,37 @@
   - `pnpm test:coverage`: passed
 - **Open issues**: None.
 
+## 2026-10-18 - Step 11: Release preparation
+- **What was built**:
+  - Structured `README.md` to fulfill all release requirements:
+    - First two sentences stating purpose for Soroban maintainers preparing for Stellar Wave and on-chain contract ID verification.
+    - Quick start with `npx waveforge-stellar repo .` and installation commands.
+    - Full readiness checks table (R1–R10) with columns `ID`, `What It Evaluates`, `Why It Matters for Wave Contributors`.
+    - Issue linting rules table (I1–I7, S1–S3, F1).
+    - Compact 10-line programmatic library usage example.
+    - Documented CLI exit codes (`0`, `1`, `2`).
+    - Stated automated heuristics limitations and organizer approval discretion.
+    - Plain text reference: `Related repositories: waveforge-action`.
+  - Bumped version in `package.json` to `0.1.0`.
+  - Authored `CHANGELOG.md` with complete notes for initial `0.1.0` release.
+  - Executed release packaging checks:
+    - Ran `pnpm build`.
+    - Ran `npm pack --dry-run` confirming tarball contents contain only `dist`, `README.md`, `LICENSE`, `package.json`.
+    - Packed tarball and installed it in an isolated temporary directory outside the repository.
+    - Ran CLI in temporary directory with `--version` (`waveforge 0.1.0`).
+    - Ran CLI `repo . --offline` in temporary directory verifying readiness diagnostics.
+    - Imported library in Node verifying all 6 public API functions.
+    - Cleaned up and deleted tarball and temporary directory.
+- **Commands run with results**:
+  - `pnpm build`: passed (TSUP compiled `dist/index.js`, `dist/cli.js`, and `dist/index.d.ts`)
+  - `pnpm lint`: passed (0 errors, 0 warnings across codebase)
+  - `pnpm typecheck`: passed (`tsc --noEmit` clean with 0 errors)
+  - `pnpm test`: passed (121 passed, 1 skipped across 9 test suites)
+  - `node dist/cli.js repo .`: passed (100% score)
+  - Release tarball verification script: all 7 steps passed
+- **Open issues**: None.
+
+
 
 
 
