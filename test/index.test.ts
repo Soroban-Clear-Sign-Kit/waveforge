@@ -40,4 +40,17 @@ describe("waveforge scaffold", () => {
     expect(report.summary?.skipped).toBe(4);
     expect(report.summary?.total).toBe(11);
   });
+
+  it("exports exactly the public library API contract", async () => {
+    const lib = await import("../src/index.js");
+    const exportsList = Object.keys(lib).sort();
+    expect(exportsList).toEqual([
+      "formatJson",
+      "formatMarkdown",
+      "formatText",
+      "runIssueLint",
+      "runRepoChecks",
+      "score",
+    ]);
+  });
 });

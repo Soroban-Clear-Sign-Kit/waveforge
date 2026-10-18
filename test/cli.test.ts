@@ -1,14 +1,22 @@
 import { describe, it, expect } from "vitest";
 import { spawnSync } from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 
 describe("CLI process exit codes", () => {
   const cliPath = path.resolve(process.cwd(), "dist/cli.js");
 
-  function runCli(args: string[], input?: string) {
+  function runCli(
+    args: string[],
+    inputOrOptions?: string | { input?: string; cwd?: string },
+  ) {
+    const input = typeof inputOrOptions === "string" ? inputOrOptions : inputOrOptions?.input;
+    const cwd = typeof inputOrOptions === "object" ? inputOrOptions.cwd : undefined;
     return spawnSync(process.execPath, [cliPath, ...args], {
       encoding: "utf-8",
       input,
+      cwd,
     });
   }
 
@@ -31,9 +39,14 @@ describe("CLI process exit codes", () => {
   });
 
   it("exits with 0 on init-action", () => {
-    const res = runCli(["init-action"]);
-    expect(res.status).toBe(0);
-    expect(res.stdout).toContain("initialized");
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "waveforge-cli-init-"));
+    try {
+      const res = runCli(["init-action"], { cwd: tmp });
+      expect(res.status).toBe(0);
+      expect(res.stdout).toContain("Created .github/workflows/waveforge.yml");
+    } finally {
+      fs.rmSync(tmp, { recursive: true, force: true });
+    }
   });
 
   it("exits with 0 on valid repo command without failures", () => {
