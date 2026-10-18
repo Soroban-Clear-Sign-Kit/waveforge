@@ -82,37 +82,52 @@ waveforge issue ./issue.md --min-score=90
 
 ### 3. Initialize Action Workflow (`waveforge init-action`)
 
-Validates or sets up CI integration:
+Sets up GitHub Actions automation by generating `.github/workflows/waveforge.yml` configured to run `waveforge-action`:
 
 ```bash
+# Initialize .github/workflows/waveforge.yml with default action ref
 waveforge init-action
+
+# Overwrite an existing workflow file
+waveforge init-action --force
+
+# Use a custom action reference
+waveforge init-action --force --ref=my-org/waveforge-action@v1
 ```
 
 ---
 
 ## Programmatic Library API
 
-`waveforge-stellar` exports a full TypeScript library API for programmatic use in custom scripts, test harnesses, or CI pipelines:
+`waveforge-stellar` exports a minimal, deterministic TypeScript library API. See [docs/API.md](docs/API.md) for full specifications, options, and offline-safety guarantees.
 
 ```typescript
 import {
   runRepoChecks,
-  lintIssueMarkdown,
-  repoChecks,
-  issueRules,
+  runIssueLint,
+  score,
+  formatText,
+  formatMarkdown,
+  formatJson,
+  type Status,
+  type CheckResult,
   type Report,
+  type RepoOptions,
+  type IssueOptions,
 } from "waveforge-stellar";
 
-// 1. Run repository checks
-const repoReport: Report = await runRepoChecks("./my-soroban-repo", {
+// 1. Run repository readiness checks
+const repoReport: Report = await runRepoChecks(".", {
   offline: false,
+  network: "testnet",
 });
+console.log(formatText(repoReport));
 
-console.log(`Passed: ${repoReport.summary.pass}/${repoReport.summary.total}`);
-
-// 2. Lint issue markdown
-const issueReport: Report = await lintIssueMarkdown("issue.md", "# Test Issue");
-console.log(`Checks total: ${issueReport.summary.total}`);
+// 2. Lint issue markdown text
+const issueReport: Report = await runIssueLint(issueMarkdown, {
+  title: "Add liquidity contract",
+});
+console.log(`Issue Score: ${issueReport.score}%`);
 ```
 
 ---

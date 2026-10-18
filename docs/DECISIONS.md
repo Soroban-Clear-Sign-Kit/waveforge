@@ -15,4 +15,7 @@
 | 2026-10-17 | Issue rules S1-S3 and F1 conditional activation | S1-S3 return 'skipped' when text has no Soroban references; F1 returns 'skipped' when text has no UI/component references |
 | 2026-10-17 | Standard input support via '-' | 'waveforge issue -' reads from process.stdin to support shell pipeline integration |
 | 2026-10-17 | Complexity points mapping | Maps 100 points to Trivial, 150 points to Medium, and 200 points to High |
+| 2026-10-18 | Public API exact export boundary | src/index.ts exports only runRepoChecks, runIssueLint, score, formatText, formatMarkdown, formatJson, and types Status, CheckResult, Report, RepoOptions, IssueOptions; internals remain private |
+| 2026-10-18 | init-action workflow structure | Writes single .github/workflows/waveforge.yml with two distinct jobs: waveforge-repo (on pull_request/workflow_dispatch, contents: read) and waveforge-issue (on issues [opened, edited], issues: write) |
+| 2026-10-18 | init-action default ref | Read from package.json waveforge.actionRef (defaults to Soroban-Clear-Sign-Kit/waveforge-action@v1) |
 

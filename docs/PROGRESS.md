@@ -218,6 +218,31 @@
   - `pnpm test:coverage`: passed (90.15% lines, 87.97% statements, 95.03% lines in `src/issue`)
 - **Open issues**: None.
 
+## 2026-10-18 - Step 10: Library API and init-action
+- **What was built**:
+  - Constrained `src/index.ts` to export exactly the contract defined in Step 10:
+    - Value exports: `runRepoChecks`, `runIssueLint`, `score`, `formatText`, `formatMarkdown`, `formatJson`.
+    - Type exports: `Status`, `CheckResult`, `Report`, `RepoOptions`, `IssueOptions`.
+    - All internal utilities and helpers remain unexported from the library entrypoint.
+  - Authored `docs/API.md` with complete documentation for all exports, options, parameters, return types, code examples, contract boundaries for `waveforge-action`, and the deterministic offline-safety guarantee that network checks never pass offline.
+  - Added `package.json` configuration field `"waveforge": { "actionRef": "Soroban-Clear-Sign-Kit/waveforge-action@v1" }`.
+  - Implemented `init-action` command and workflow generator in `src/init-action.ts` and `src/cli.ts`:
+    - Generates `.github/workflows/waveforge.yml` in current working directory.
+    - Configures triggers: on `issues` `[opened, edited]` running with `mode: issue` and permissions `issues: write`; on `pull_request` and `workflow_dispatch` running with `mode: repo` and permissions `contents: read`.
+    - Refuses to overwrite existing workflow files unless `--force` is specified.
+    - Supports custom `--ref <owner>/waveforge-action@v1` option, defaulting to `package.json` `waveforge.actionRef`.
+  - Added test suite `test/init-action.test.ts` (7 tests) verifying YAML validity, structure, overwrite refusal, force overwriting, and CLI execution.
+  - Added snapshot verification in `test/index.test.ts` verifying that `Object.keys(waveforge).sort()` matches the library API contract exactly.
+  - Updated `README.md` and `docs/DECISIONS.md`.
+- **Commands run with results**:
+  - `pnpm build`: passed (TSUP compiled `dist/index.js`, `dist/cli.js`, and `dist/index.d.ts` in 3.1s)
+  - `pnpm lint`: passed (0 errors, 0 warnings across codebase)
+  - `pnpm typecheck`: passed (`tsc --noEmit` clean with 0 errors)
+  - `pnpm test`: passed (121 passed, 1 skipped across 9 test suites)
+  - `pnpm test:coverage`: passed
+- **Open issues**: None.
+
+
 
 
 
