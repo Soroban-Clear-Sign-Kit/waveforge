@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { runRepoChecks } from "./repo/index.js";
 import { runIssueLint } from "./issue/index.js";
+import { initAction } from "./init-action.js";
 import { formatText, formatMarkdown, formatJson, type Report } from "./report.js";
 
 function getPackageVersion(): string {
@@ -23,7 +24,7 @@ function printHelp(): void {
 Usage:
   waveforge repo [path] [--network=<net>] [--rpc-url=<url>] [--offline] [--json] [--markdown] [--format=text|markdown|json] [--min-score=N]
   waveforge issue <file|-> [--title=<title>] [--json] [--markdown] [--format=text|markdown|json] [--min-score=N]
-  waveforge init-action
+  waveforge init-action [--force] [--ref=<ref>]
   waveforge --help
   waveforge --version
 
@@ -34,6 +35,8 @@ Options:
   --network=<net>   Target Stellar network: testnet (default) or mainnet
   --rpc-url=<url>   Explicit Soroban RPC URL (required for mainnet)
   --offline         Skip network calls and mark network checks as skipped
+  --force           Overwrite existing .github/workflows/waveforge.yml
+  --ref=<ref>       Custom GitHub Action ref (default from package.json)
   --json            Output report as JSON
   --markdown        Output report as Markdown
   --format=<fmt>    Output format: text (default), markdown, or json
@@ -79,6 +82,8 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
         offline: { type: "boolean", default: false },
         network: { type: "string", default: "testnet" },
         "rpc-url": { type: "string" },
+        force: { type: "boolean", default: false },
+        ref: { type: "string" },
         json: { type: "boolean", default: false },
         markdown: { type: "boolean", default: false },
       },
@@ -205,7 +210,14 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
   }
 
   if (command === "init-action") {
-    console.log("GitHub Action workflow configuration initialized.");
+    const force = Boolean(values.force);
+    const ref = typeof values.ref === "string" ? values.ref : undefined;
+    const result = await initAction({ force, ref });
+    if (!result.success) {
+      console.error(result.message);
+      return 1;
+    }
+    console.log(result.message);
     return 0;
   }
 
