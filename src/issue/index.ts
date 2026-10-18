@@ -42,3 +42,4 @@ export async function lintIssueMarkdown(
 
 export * from "./rules.js";
 export type { IssueLintOptions, ParsedIssue, IssueRule };
+export type IssueOptions = IssueLintOptions;

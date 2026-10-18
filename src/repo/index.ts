@@ -44,6 +44,8 @@ export interface CheckOptions {
   sorobanCratesFound?: boolean;
 }
 
+export type RepoOptions = CheckOptions;
+
 export async function runRepoChecks(repoPath: string, options: CheckOptions = {}): Promise<Report> {
   const results: CheckResult[] = [];
   const currentOptions = { ...options };
