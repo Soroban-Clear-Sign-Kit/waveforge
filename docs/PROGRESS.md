@@ -272,6 +272,34 @@
   - Release tarball verification script: all 7 steps passed
 - **Open issues**: None.
 
+## 2026-10-18 - Step 12: Dogfood and seed issues
+- **What was built**:
+  - Dogfooded repository readiness checks: ran `node dist/cli.js repo .` against this repository.
+    - Verified score: 100% (R1–R6, R9–R10 passed; R7 and R8 skipped as expected with no Soroban contract crates or on-chain contract IDs).
+    - Confirmed zero failures and zero warnings apply to the repository.
+  - Authored 9 seed issues from real gaps and planned enhancements under `docs/seed-issues/<n>.md` and indexed in `docs/seed-issues.md`:
+    - `01.md`: Add issue-rule fixtures for real Stellar Wave community issues (Trivial, 100 pts, score 100%)
+    - `02.md`: Standardize diagnostic fix message copy across repository checks (Trivial, 100 pts, score 100%)
+    - `03.md`: Expand README documentation with CLI exit code examples and edge cases (Trivial, 100 pts, score 100%)
+    - `04.md`: Implement check R13 for automated testnet deployment scripts (Medium, 150 pts, score 100%)
+    - `05.md`: Add SARIF output format support for GitHub code scanning (Medium, 150 pts, score 100%)
+    - `06.md`: Spike check R12 for state-changing authorization analysis (Medium, 150 pts, score 100%)
+    - `07.md`: Add template scaffolding with --fix mode for missing community files (Medium, 150 pts, score 100%)
+    - `08.md`: Implement check R11 for Soroban contract instance TTL extension (High, 200 pts, score 100%)
+    - `09.md`: Support Go language repositories in repository CI verification (High, 200 pts, score 100%)
+    - Complexity distribution: 3 Trivial, 4 Medium, 2 High (fulfilling at least 3 Trivial, at least 3 Medium, at most 3 High).
+    - Every issue requires no secrets, no mainnet funds, no maintainer-only access, and no external repository changes.
+  - Linted every seed issue body with `node dist/cli.js issue`; all 9 scored 100% (exceeding the >= 80 requirement).
+  - Formatted ready-to-run `gh issue create` CLI command specifications in `docs/seed-issues.md`.
+- **Commands run with results**:
+  - `node dist/cli.js repo .`: passed (100% score; R1–R6, R9–R10 PASS; R7, R8 SKIP)
+  - `node dist/cli.js issue docs/seed-issues/<01-09>.md`: all 9 passed (100% score each)
+  - `pnpm build`: passed
+  - `pnpm lint`: passed (0 errors, 0 warnings)
+  - `pnpm typecheck`: passed (0 errors)
+  - `pnpm test`: passed (121 passed, 1 skipped across 9 test suites)
+- **Open issues**: None.
+
 
 
 

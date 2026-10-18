@@ -20,4 +20,4 @@
 | 2026-10-18 | init-action default ref | Read from package.json waveforge.actionRef (defaults to Soroban-Clear-Sign-Kit/waveforge-action@v1) |
 | 2026-10-18 | Package distribution whitelist | package.json 'files' field restricted to dist, README.md, LICENSE; confirmed with npm pack --dry-run |
 | 2026-10-18 | Pre-release isolated installation verification | Verified tarball installation and CLI/API execution in isolated external temp directory prior to release tagging |
-
+| 2026-10-18 | Seed issues catalog and complexity distribution | Authored 9 seed issues from real repo gaps with 3 Trivial (100), 4 Medium (150), and 2 High (200), all scoring 100% on issue lint |
