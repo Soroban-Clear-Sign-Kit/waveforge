@@ -9,6 +9,9 @@
   "bin": {
     "waveforge": "./dist/cli.js"
   },
+  "waveforge": {
+    "actionRef": "Soroban-Clear-Sign-Kit/waveforge-action@v1"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
