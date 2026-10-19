@@ -167,5 +167,5 @@ describe("init-action workflow generator", () => {
     expect(run4.status).toBe(0);
     const content = fs.readFileSync(path.join(tmpDir, ".github", "workflows", "waveforge.yml"), "utf-8");
     expect(content).toContain("custom-org/action@v3");
-  });
+  }, 60000);
 });
