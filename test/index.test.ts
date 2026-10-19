@@ -53,4 +53,13 @@ describe("waveforge scaffold", () => {
       "score",
     ]);
   });
+
+  it("fails if package.json has no bin.waveforge entry", async () => {
+    const fs = await import("node:fs");
+    const pkgPath = new URL("../package.json", import.meta.url);
+    const content = fs.readFileSync(pkgPath, "utf-8");
+    const pkg = JSON.parse(content) as { bin?: { waveforge?: string } };
+    expect(pkg.bin).toBeDefined();
+    expect(pkg.bin?.waveforge).toBe("dist/cli.js");
+  });
 });

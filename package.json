@@ -1,13 +1,13 @@
 {
   "name": "waveforge-stellar",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "Apache-2.0",
   "description": "Stellar Wave readiness checker and issue linter",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "waveforge": "./dist/cli.js"
+    "waveforge": "dist/cli.js"
   },
   "waveforge": {
     "actionRef": "Soroban-Clear-Sign-Kit/waveforge-action@v1"
