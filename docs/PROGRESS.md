@@ -335,3 +335,18 @@
   - `gh issue create`: created issues #1 through #9 on GitHub
 - **Open issues**: None.
 
+
+## 2026-11-02 - Step: Check R11 for Soroban Contract Instance TTL Extension (Issue #8)
+- **What was built**:
+  - Implemented 
+11Check in src/repo/r11.ts to inspect Soroban Rust smart contracts for storage lifetime management and periodic extend_ttl calls to prevent state archival on Stellar.
+  - Returns skipped when no Soroban contracts exist, pass when TTL extension patterns (extend_ttl, extend_ttl_instance) are discovered, and warn with remediation documentation when absent.
+  - Registered 
+11Check in src/repo/index.ts within the repository evaluation pipeline.
+  - Added unit test cases in 	est/repo-checks.test.ts.
+  - Updated docs/DECISIONS.md.
+- **Commands run with results**:
+  - pnpm lint: passed with 0 errors
+  - pnpm typecheck: passed with 0 errors
+  - pnpm build: passed (tsup built ESM and types cleanly)
+- **Open issues**: Closes #8.
