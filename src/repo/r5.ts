@@ -26,7 +26,7 @@ export async function r5Check(root: string, _options?: unknown): Promise<CheckRe
       title: "Issue Templates Configuration",
       status: "warn",
       message: "Could not read .github/ISSUE_TEMPLATE directory.",
-      fix: "Ensure .github/ISSUE_TEMPLATE is readable.",
+      fix: "Configure readable permissions for .github/ISSUE_TEMPLATE.",
     };
   }
 
