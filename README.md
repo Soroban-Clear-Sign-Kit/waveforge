@@ -6,7 +6,7 @@ WaveForge is a TypeScript library and CLI tool that helps Soroban repository mai
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![node version](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg)](package.json)
 
-**Current release**: `v0.1.0` · **Network**: Stellar testnet and mainnet (read-only) · **Status**: Published on npm
+**Current release**: `v0.1.1` · **Network**: Stellar testnet and mainnet (read-only) · **Status**: Published on npm
 
 ---
 
