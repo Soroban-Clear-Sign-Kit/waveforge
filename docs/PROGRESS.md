@@ -321,12 +321,17 @@
   - `npm pack --dry-run`: passed (8 files, 86.4 kB tarball)
 - **Open issues**: None.
 
-
-
-
-
-
-
-
-
+## 2026-11-01 - Pre-Wave Submission Audit and Issue Creation
+- **What was built**:
+  - Updated `README.md` current release badge text from `v0.1.0` to `v0.1.1`.
+  - Replaced local `file:///` links in `docs/seed-issues.md` with relative repository links (`./seed-issues/01.md` through `09.md`).
+  - Created GitHub labels (`stellar-wave`, `good-first-issue`, `spike`, `complex`, `new-check`) and opened all 9 seed issues (`#1`–`#9`) on `Soroban-Clear-Sign-Kit/waveforge`.
+- **Commands run with results**:
+  - `pnpm build`: passed
+  - `pnpm lint`: passed (0 errors, 0 warnings)
+  - `pnpm typecheck`: passed (0 errors)
+  - `pnpm test`: passed (122 passed, 1 skipped across 9 test suites)
+  - `node dist/cli.js repo .`: passed (100% score)
+  - `gh issue create`: created issues #1 through #9 on GitHub
+- **Open issues**: None.
 
