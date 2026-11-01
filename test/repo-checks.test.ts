@@ -420,7 +420,61 @@ describe("runRepoChecks across fixtures", () => {
     expect(statuses["R5"]).toBe("warn");
     expect(statuses["R6"]).toBe("fail");
   });
+
+describe("R6 - Go Language CI Verification", () => {
+  it("fails when go.mod is present but CI workflow lacks go test", async () => {
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "waveforge-go-fail-"));
+    try {
+      await fs.writeFile(path.join(tmp, "go.mod"), "module github.com/stellar/go-test\n\ngo 1.22\n");
+      await fs.mkdir(path.join(tmp, ".github/workflows"), { recursive: true });
+      await fs.writeFile(
+        path.join(tmp, ".github/workflows/ci.yml"),
+        "name: CI\non: pull_request\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo hello\n"
+      );
+      const res = await r6Check(tmp);
+      expect(res.id).toBe("R6");
+      expect(res.status).toBe("fail");
+      expect(res.message).toContain("Go repository detected");
+    } finally {
+      await fs.rm(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it("warns when go.mod is present and CI runs go test but lacks linter", async () => {
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "waveforge-go-warn-"));
+    try {
+      await fs.writeFile(path.join(tmp, "go.mod"), "module github.com/stellar/go-test\n\ngo 1.22\n");
+      await fs.mkdir(path.join(tmp, ".github/workflows"), { recursive: true });
+      await fs.writeFile(
+        path.join(tmp, ".github/workflows/ci.yml"),
+        "name: CI\non: pull_request\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - run: go test ./...\n"
+      );
+      const res = await r6Check(tmp);
+      expect(res.id).toBe("R6");
+      expect(res.status).toBe("warn");
+      expect(res.message).toContain("no linter (golangci-lint or staticcheck) detected");
+    } finally {
+      await fs.rm(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it("passes when go.mod is present, CI runs go test and golangci-lint", async () => {
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "waveforge-go-pass-"));
+    try {
+      await fs.writeFile(path.join(tmp, "go.mod"), "module github.com/stellar/go-test\n\ngo 1.22\n");
+      await fs.mkdir(path.join(tmp, ".github/workflows"), { recursive: true });
+      await fs.writeFile(
+        path.join(tmp, ".github/workflows/ci.yml"),
+        "name: CI\non: pull_request\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - run: go test ./...\n      - run: golangci-lint run\n"
+      );
+      const res = await r6Check(tmp);
+      expect(res.id).toBe("R6");
+      expect(res.status).toBe("pass");
+      expect(res.message).toContain("Found Go CI workflow");
+    } finally {
+      await fs.rm(tmp, { recursive: true, force: true });
+    }
+  });
 });
 
-
-
+});

@@ -2,7 +2,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import yaml from "yaml";
 import type { CheckResult } from "../report.js";
-import { dirExists, readTextFile } from "../util/fs.js";
+import { dirExists, fileExists, readTextFile } from "../util/fs.js";
 
 function triggersOnPullRequest(onValue: unknown): boolean {
   if (typeof onValue === "string") {
@@ -42,7 +42,43 @@ function hasTestRunStep(jobs: unknown): boolean {
   return false;
 }
 
+function hasGoTestStep(jobs: unknown): boolean {
+  if (!jobs || typeof jobs !== "object") return false;
+  for (const job of Object.values(jobs as Record<string, WorkflowJob>)) {
+    if (job && Array.isArray(job.steps)) {
+      for (const step of job.steps as WorkflowStep[]) {
+        if (step && typeof step.run === "string" && /\bgo\s+test\b/i.test(step.run)) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+function hasGoLintStep(jobs: unknown): boolean {
+  if (!jobs || typeof jobs !== "object") return false;
+  for (const job of Object.values(jobs as Record<string, WorkflowJob>)) {
+    if (job && Array.isArray(job.steps)) {
+      for (const step of job.steps as WorkflowStep[]) {
+        if (step && typeof step.run === "string") {
+          if (/\b(golangci-lint|staticcheck|go\s+vet)\b/i.test(step.run)) {
+            return true;
+          }
+        }
+        if (step && typeof step.name === "string") {
+          if (/\b(golangci-lint|staticcheck|go\s+vet)\b/i.test(step.name)) {
+            return true;
+          }
+        }
+      }
+    }
+  }
+  return false;
+}
+
 export async function r6Check(root: string, _options?: unknown): Promise<CheckResult> {
+  const isGoProject = await fileExists(path.join(root, "go.mod"));
   const workflowsDir = path.join(root, ".github", "workflows");
 
   if (!(await dirExists(workflowsDir))) {
@@ -51,7 +87,9 @@ export async function r6Check(root: string, _options?: unknown): Promise<CheckRe
       title: "CI Workflow Automation",
       status: "fail",
       message: "No .github/workflows directory found.",
-      fix: "Add a GitHub Actions workflow in .github/workflows/ triggering on pull_request with a test step.",
+      fix: isGoProject
+        ? "Add a GitHub Actions workflow in .github/workflows/ triggering on pull_request with 'go test ./...'."
+        : "Add a GitHub Actions workflow in .github/workflows/ triggering on pull_request with a test step.",
     };
   }
 
@@ -64,12 +102,14 @@ export async function r6Check(root: string, _options?: unknown): Promise<CheckRe
       title: "CI Workflow Automation",
       status: "fail",
       message: "Could not read .github/workflows directory.",
-      fix: "Ensure .github/workflows is readable.",
+      fix: "Configure readable permissions for .github/workflows.",
     };
   }
 
   const workflowFiles = entries.filter((e) => /\.(ya?ml)$/i.test(e));
   let matchingWorkflow: string | null = null;
+  let goWorkflowHasGoTest = false;
+  let goWorkflowHasLint = false;
 
   for (const file of workflowFiles) {
     const fullPath = path.join(workflowsDir, file);
@@ -81,15 +121,53 @@ export async function r6Check(root: string, _options?: unknown): Promise<CheckRe
       if (!parsed || typeof parsed !== "object") continue;
 
       const onClause = parsed["on"] ?? (parsed as Record<string, unknown>)["true"];
-      if (triggersOnPullRequest(onClause) && hasTestRunStep(parsed["jobs"])) {
-        matchingWorkflow = file;
-        break;
+      if (triggersOnPullRequest(onClause)) {
+        if (hasTestRunStep(parsed["jobs"])) {
+          matchingWorkflow = file;
+        }
+        if (hasGoTestStep(parsed["jobs"])) {
+          goWorkflowHasGoTest = true;
+        }
+        if (hasGoLintStep(parsed["jobs"])) {
+          goWorkflowHasLint = true;
+        }
       }
     } catch {
       // ignore syntax error in one workflow
     }
   }
 
+  // Go repository specific verification
+  if (isGoProject) {
+    if (!goWorkflowHasGoTest) {
+      return {
+        id: "R6",
+        title: "CI Workflow Automation",
+        status: "fail",
+        message: "Go repository detected (go.mod), but no pull_request workflow runs 'go test'.",
+        fix: "Add a step running 'go test ./...' in your pull_request CI workflow in .github/workflows/.",
+      };
+    }
+
+    if (!goWorkflowHasLint) {
+      return {
+        id: "R6",
+        title: "CI Workflow Automation",
+        status: "warn",
+        message: `Found Go CI workflow (${matchingWorkflow ?? "ci.yml"}) with 'go test', but no linter (golangci-lint or staticcheck) detected.`,
+        fix: "Add a linter step using 'golangci-lint' or 'staticcheck' to your Go CI workflow.",
+      };
+    }
+
+    return {
+      id: "R6",
+      title: "CI Workflow Automation",
+      status: "pass",
+      message: `Found Go CI workflow (${matchingWorkflow ?? "ci.yml"}) with 'go test' and lint verification.`,
+    };
+  }
+
+  // Standard generic / Node / Rust repository verification
   if (!matchingWorkflow) {
     return {
       id: "R6",

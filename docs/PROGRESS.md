@@ -335,3 +335,16 @@
   - `gh issue create`: created issues #1 through #9 on GitHub
 - **Open issues**: None.
 
+
+## 2026-11-02 - Step: Support Go Language Repositories in CI Verification (Issue #9)
+- **What was built**:
+  - Extended rule R6 in src/repo/r6.ts to detect Go repositories via go.mod.
+  - Enforced that Go projects must run go test in pull_request CI workflows.
+  - Added warning diagnostic if common Go linters (golangci-lint, staticcheck, or go vet) are missing.
+  - Added unit test cases in 	est/repo-checks.test.ts.
+  - Updated docs/DECISIONS.md.
+- **Commands run with results**:
+  - pnpm lint: passed with 0 errors
+  - pnpm typecheck: passed with 0 errors
+  - pnpm build: passed (tsup built ESM and types cleanly)
+- **Open issues**: Closes #9.
