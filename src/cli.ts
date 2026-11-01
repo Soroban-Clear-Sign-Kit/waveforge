@@ -5,6 +5,7 @@ import path from "node:path";
 import { runRepoChecks } from "./repo/index.js";
 import { runIssueLint } from "./issue/index.js";
 import { initAction } from "./init-action.js";
+import { scaffoldTemplates } from "./templates/index.js";
 import { formatText, formatMarkdown, formatJson, type Report } from "./report.js";
 
 function getPackageVersion(): string {
@@ -80,6 +81,7 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
         "min-score": { type: "string" },
         format: { type: "string" },
         offline: { type: "boolean", default: false },
+        fix: { type: "boolean", default: false },
         network: { type: "string", default: "testnet" },
         "rpc-url": { type: "string" },
         force: { type: "boolean", default: false },
@@ -145,6 +147,13 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
     }
 
     try {
+      if (Boolean(values.fix)) {
+        const scaffoldResult = await scaffoldTemplates(resolvedPath, { force: Boolean(values.force) });
+        if (scaffoldResult.created.length > 0) {
+          console.log(`[fix] Scaffolded issue templates: ${scaffoldResult.created.join(", ")}`);
+        }
+      }
+
       const report = await runRepoChecks(repoPath, { offline, network, rpcUrl });
       printFormattedReport(report, format);
 

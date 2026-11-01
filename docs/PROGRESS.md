@@ -335,3 +335,17 @@
   - `gh issue create`: created issues #1 through #9 on GitHub
 - **Open issues**: None.
 
+
+## 2026-11-02 - Step: Template Scaffolding with --fix Mode (Issue #7)
+- **What was built**:
+  - Implemented scaffoldTemplates(root, options) in src/templates/index.ts to generate standard YAML issue forms (ug.yml, eature.yml, spike.yml) and config.yml with lank_issues_enabled: false.
+  - Added --fix flag to the 
+epo CLI command in src/cli.ts to resolve R5 warnings on demand without overwriting customized templates unless --force is specified.
+  - Exported scaffoldTemplates from public library boundary in src/index.ts.
+  - Added CLI test in 	est/cli.test.ts verifying that --fix scaffolds templates and upgrades R5 from WARN to PASS.
+  - Updated docs/DECISIONS.md.
+- **Commands run with results**:
+  - pnpm typecheck: passed with 0 errors
+  - pnpm lint: passed with 0 errors
+  - pnpm build: passed (tsup built ESM and types cleanly)
+- **Open issues**: Closes #7.
