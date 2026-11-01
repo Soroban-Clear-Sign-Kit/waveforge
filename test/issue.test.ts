@@ -253,4 +253,23 @@ describe("Issue Linter Fixtures", () => {
     expect(f1?.status).toBe("warn");
     expect(i4?.status).toBe("warn");
   });
+
+  it("wave-example-1.md (Stellar Wave Soroban feature) passes all rules with 100% score", async () => {
+    const content = readFixture("wave-example-1.md");
+    const report = await runIssueLint(content, { filePath: "test/fixtures/issues/wave-example-1.md" });
+    expect(report.score).toBe(100);
+    expect(report.results.every((r) => r.status === "pass" || r.status === "skipped")).toBe(true);
+    expect(report.meta?.["suggestedComplexity"]).toBe("High");
+    expect(report.results.find((r) => r.id === "S1")?.status).toBe("pass");
+    expect(report.results.find((r) => r.id === "S2")?.status).toBe("pass");
+    expect(report.results.find((r) => r.id === "S3")?.status).toBe("pass");
+  });
+
+  it("wave-example-2.md (Stellar Wave docs task with frontmatter) passes with 100% score", async () => {
+    const content = readFixture("wave-example-2.md");
+    const report = await runIssueLint(content, { filePath: "test/fixtures/issues/wave-example-2.md" });
+    expect(report.score).toBe(100);
+    expect(report.results.every((r) => r.status === "pass" || r.status === "skipped")).toBe(true);
+    expect(report.meta?.["suggestedComplexity"]).toBe("Trivial");
+  });
 });
