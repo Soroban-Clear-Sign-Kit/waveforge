@@ -5,6 +5,7 @@ export {
   formatText,
   formatMarkdown,
   formatJson,
+  formatSarif,
   type Status,
   type CheckResult,
   type Report,
