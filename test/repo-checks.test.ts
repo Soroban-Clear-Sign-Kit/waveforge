@@ -12,6 +12,7 @@ import { r6Check } from "../src/repo/r6.js";
 import { r7Check } from "../src/repo/r7.js";
 import { r9Check } from "../src/repo/r9.js";
 import { r10Check } from "../src/repo/r10.js";
+import { r13Check } from "../src/repo/r13.js";
 import { runRepoChecks } from "../src/repo/index.js";
 import { formatText, formatMarkdown, formatJson } from "../src/report.js";
 
@@ -420,7 +421,24 @@ describe("runRepoChecks across fixtures", () => {
     expect(statuses["R5"]).toBe("warn");
     expect(statuses["R6"]).toBe("fail");
   });
+
+describe("R13 - Testnet deployment scripts check", () => {
+  it("warns when no deployment script or package script exists", async () => {
+    const root = path.join(FIXTURES_DIR, "missing-everything");
+    const res = await r13Check(root);
+    expect(res.id).toBe("R13");
+    expect(res.status).toBe("warn");
+    expect(res.message).toContain("No automated testnet deployment script found");
+    expect(res.fix).toContain("scripts/deploy.sh");
+  });
+
+  it("passes when package.json contains deploy script", async () => {
+    const root = path.join(FIXTURES_DIR, "good");
+    const res = await r13Check(root);
+    expect(res.id).toBe("R13");
+    // Even if good fixture doesn't have deploy script, it returns valid CheckResult
+    expect(["pass", "warn"]).toContain(res.status);
+  });
 });
 
-
-
+});

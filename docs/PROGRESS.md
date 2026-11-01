@@ -335,3 +335,17 @@
   - `gh issue create`: created issues #1 through #9 on GitHub
 - **Open issues**: None.
 
+
+## 2026-11-02 - Step: Check R13 for Automated Testnet Deployment Scripts (Issue #4)
+- **What was built**:
+  - Implemented 
+13Check in src/repo/r13.ts to detect executable deployment scripts (scripts/deploy*.sh, .ts, .js, .py), root deploy scripts, package.json deployment scripts, and Makefile targets.
+  - Registered 
+13Check in src/repo/index.ts within the repository readiness evaluation pipeline.
+  - Added unit test cases in 	est/repo-checks.test.ts.
+  - Updated docs/DECISIONS.md.
+- **Commands run with results**:
+  - pnpm lint: passed with 0 errors
+  - pnpm typecheck: passed with 0 errors
+  - pnpm build: passed (tsup built ESM and types cleanly)
+- **Open issues**: Closes #4.
