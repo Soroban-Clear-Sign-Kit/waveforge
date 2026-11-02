@@ -186,4 +186,4 @@ WaveForge provides automated heuristics to assist maintainers and contributors i
 
 ---
 
-Related repositories: waveforge-action
+Related repositories: [waveforge-action](https://github.com/Soroban-Clear-Sign-Kit/waveforge-action)
