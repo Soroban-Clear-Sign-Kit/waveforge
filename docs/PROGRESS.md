@@ -323,7 +323,7 @@
 
 ## 2026-11-01 - Pre-Wave Submission Audit and Issue Creation
 - **What was built**:
-  - Updated `README.md` current release badge text from `v0.1.0` to `v0.1.1`.
+  - Updated `README.md` current release badge text from `v0.1.0` to `v0.1.1` and linked `waveforge-action` to `https://github.com/Soroban-Clear-Sign-Kit/waveforge-action`.
   - Replaced local `file:///` links in `docs/seed-issues.md` with relative repository links (`./seed-issues/01.md` through `09.md`).
   - Created GitHub labels (`stellar-wave`, `good-first-issue`, `spike`, `complex`, `new-check`) and opened all 9 seed issues (`#1`–`#9`) on `Soroban-Clear-Sign-Kit/waveforge`.
 - **Commands run with results**:
