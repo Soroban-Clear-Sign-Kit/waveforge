@@ -335,3 +335,17 @@
   - `gh issue create`: created issues #1 through #9 on GitHub
 - **Open issues**: None.
 
+
+## 2026-11-02 - Step: Spike R12 State-Changing Authorization Analysis (Issue #6)
+- **What was built**:
+  - Authored comprehensive architectural spike report in docs/spikes/r12-auth.md.
+  - Evaluated AST parsing vs lightweight sliding-block token pattern matching for Soroban 
+equire_auth detection.
+  - Specified authorization rules: all mutating public contract functions modifying persistent/instance storage must verify caller authorization.
+  - Outlined contract testing standards under cargo test and build verification via stellar contract build.
+  - Updated docs/DECISIONS.md.
+- **Commands run with results**:
+  - pnpm lint: passed with 0 errors
+  - pnpm typecheck: passed with 0 errors
+  - pnpm build: passed (tsup built ESM and types cleanly)
+- **Open issues**: Closes #6.

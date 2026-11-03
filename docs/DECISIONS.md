@@ -22,3 +22,4 @@
 | 2026-10-18 | Pre-release isolated installation verification | Verified tarball installation and CLI/API execution in isolated external temp directory prior to release tagging |
 | 2026-10-18 | Seed issues catalog and complexity distribution | Authored 9 seed issues from real repo gaps with 3 Trivial (100), 4 Medium (150), and 2 High (200), all scoring 100% on issue lint |
 | 2026-10-19 | CLI integration test timeout extension | Increased test timeout to 60s for multi-subprocess CLI init-action test to ensure stability under v8 coverage collection on Windows |
+| 2026-11-02 | Spike R12 authorization analysis | Completed architectural spike docs/spikes/r12-auth.md recommending sliding-block token matching for require_auth detection in mutating Soroban functions |
