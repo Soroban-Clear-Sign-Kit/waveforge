@@ -10,6 +10,7 @@ import { r7Check } from "./r7.js";
 import { r8Check } from "./r8.js";
 import { r9Check } from "./r9.js";
 import { r10Check } from "./r10.js";
+import { r11Check } from "./r11.js";
 
 export type RepoCheck =
   | (((root: string, options?: CheckOptions) => Promise<CheckResult>) & {
@@ -34,6 +35,7 @@ export const repoChecks: RepoCheck[] = [
   r8Check,
   r9Check,
   r10Check,
+  r11Check,
 ];
 
 export interface CheckOptions {
@@ -81,4 +83,5 @@ export {
   r8Check,
   r9Check,
   r10Check,
+  r11Check,
 };

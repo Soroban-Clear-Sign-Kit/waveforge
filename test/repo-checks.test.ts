@@ -12,6 +12,7 @@ import { r6Check } from "../src/repo/r6.js";
 import { r7Check } from "../src/repo/r7.js";
 import { r9Check } from "../src/repo/r9.js";
 import { r10Check } from "../src/repo/r10.js";
+import { r11Check } from "../src/repo/r11.js";
 import { runRepoChecks } from "../src/repo/index.js";
 import { formatText, formatMarkdown, formatJson } from "../src/report.js";
 
@@ -420,7 +421,43 @@ describe("runRepoChecks across fixtures", () => {
     expect(statuses["R5"]).toBe("warn");
     expect(statuses["R6"]).toBe("fail");
   });
+
+describe("R11 - Soroban TTL Extension check", () => {
+  it("skips on repository without Soroban contracts", async () => {
+    const root = path.join(FIXTURES_DIR, "good");
+    const res = await r11Check(root);
+    expect(res.id).toBe("R11");
+    expect(res.status).toBe("skipped");
+    expect(res.message).toContain("No Soroban smart contracts found");
+  });
+
+  it("warns on soroban-good fixture when extend_ttl is not present", async () => {
+    const root = path.join(FIXTURES_DIR, "soroban-good");
+    const res = await r11Check(root);
+    expect(res.id).toBe("R11");
+    expect(res.status).toBe("warn");
+    expect(res.message).toContain("No contract storage TTL extension routine");
+    expect(res.fix).toContain("extend_ttl");
+  });
+
+  it("passes when contract contains extend_ttl call", async () => {
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "waveforge-ttl-"));
+    try {
+      await fs.writeFile(path.join(tmp, "Cargo.toml"), '[package]\nname = "ttl-contract"\n[dependencies]\nsoroban-sdk = "21.0.0"');
+      await fs.mkdir(path.join(tmp, "contracts/vault/src"), { recursive: true });
+      await fs.writeFile(
+        path.join(tmp, "contracts/vault/src/lib.rs"),
+        'pub fn bump(env: Env) { env.storage().instance().extend_ttl(100, 1000); }'
+      );
+      const res = await r11Check(tmp);
+      expect(res.id).toBe("R11");
+      expect(res.status).toBe("pass");
+      expect(res.evidence).toBeDefined();
+      expect(res.evidence!.length).toBeGreaterThan(0);
+    } finally {
+      await fs.rm(tmp, { recursive: true, force: true });
+    }
+  });
 });
 
-
-
+});
