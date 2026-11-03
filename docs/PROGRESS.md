@@ -335,3 +335,17 @@
   - `gh issue create`: created issues #1 through #9 on GitHub
 - **Open issues**: None.
 
+
+## 2026-11-02 - Step: Community Issue Fixtures for Stellar Wave (Issue #1)
+- **What was built**:
+  - Added 	est/fixtures/issues/wave-example-1.md representing a well-formed Soroban liquidity pool streamer issue exercising S1-S3, I1-I7 with High complexity.
+  - Added 	est/fixtures/issues/wave-example-2.md representing a realistic documentation and RPC task with frontmatter exercising I1-I7 with Trivial complexity.
+  - Updated 	est/issue.test.ts to assert that both fixtures parse and pass all issue linter rules with 100% score and expected complexity mappings.
+  - Updated docs/DECISIONS.md recording the addition of community fixtures.
+- **Commands run with results**:
+  - pnpm build: passed (tsup built ESM and types cleanly)
+  - 
+ode dist/cli.js issue test/fixtures/issues/wave-example-1.md: passed (100% score)
+  - 
+ode dist/cli.js issue test/fixtures/issues/wave-example-2.md: passed (100% score)
+- **Open issues**: Closes #1.
