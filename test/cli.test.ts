@@ -158,4 +158,16 @@ describe("CLI process exit codes", () => {
     expect(res.status).toBe(0);
     expect(res.stdout).toContain("PASS");
   });
+  it("supports --format=sarif and --sarif flags", () => {
+    const resFormat = runCli(["repo", ".", "--format=sarif", "--offline"]);
+    expect(resFormat.status).toBe(0);
+    const parsedFormat = JSON.parse(resFormat.stdout);
+    expect(parsedFormat.version).toBe("2.1.0");
+    expect(parsedFormat.runs[0].tool.driver.name).toBe("waveforge");
+
+    const resFlag = runCli(["repo", ".", "--sarif", "--offline"]);
+    expect(resFlag.status).toBe(0);
+    const parsedFlag = JSON.parse(resFlag.stdout);
+    expect(parsedFlag.version).toBe("2.1.0");
+  });
 });

@@ -335,3 +335,19 @@
   - `gh issue create`: created issues #1 through #9 on GitHub
 - **Open issues**: None.
 
+
+## 2026-11-02 - Step: SARIF 2.1.0 Formatter & Code Scanning Integration (Issue #5)
+- **What was built**:
+  - Implemented ormatSarif(report) in src/report.ts exporting standard SARIF 2.1.0 log JSON for GitHub Advanced Security and PR code scanning annotations.
+  - Mapped check failures to error severity and warnings to warning severity with action-oriented fix suggestions in help metadata.
+  - Added --format=sarif and boolean --sarif flags to src/cli.ts.
+  - Exported ormatSarif from public library boundary in src/index.ts.
+  - Added unit and CLI test coverage in 	est/report.test.ts and 	est/cli.test.ts.
+  - Documented architectural decision in docs/DECISIONS.md.
+- **Commands run with results**:
+  - pnpm typecheck: passed with 0 errors
+  - pnpm lint: passed with 0 errors
+  - pnpm build: passed (tsup built ESM and types cleanly)
+  - 
+ode dist/cli.js repo . --offline --sarif: passed (valid SARIF 2.1.0 JSON output)
+- **Open issues**: Closes #5.

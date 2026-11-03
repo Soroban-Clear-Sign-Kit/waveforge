@@ -130,3 +130,93 @@ export function formatMarkdown(report: Report): string {
 export function formatJson(report: Report): string {
   return JSON.stringify(report, null, 2);
 }
+
+export interface SarifRule {
+  id: string;
+  name: string;
+  shortDescription: { text: string };
+  fullDescription?: { text: string };
+  help?: { text: string };
+}
+
+export interface SarifResult {
+  ruleId: string;
+  level: "error" | "warning" | "note" | "none";
+  message: { text: string };
+  locations?: {
+    physicalLocation: {
+      artifactLocation: { uri: string };
+    };
+  }[];
+}
+
+export interface SarifLog {
+  $schema: string;
+  version: string;
+  runs: {
+    tool: {
+      driver: {
+        name: string;
+        informationUri?: string;
+        rules: SarifRule[];
+      };
+    };
+    results: SarifResult[];
+  }[];
+}
+
+export function formatSarif(report: Report): string {
+  const sarifRules: SarifRule[] = report.results.map((r) => ({
+    id: r.id,
+    name: r.title.replace(/\s+/g, ""),
+    shortDescription: { text: r.title },
+    fullDescription: { text: r.title },
+    help: r.fix ? { text: r.fix } : undefined,
+  }));
+
+  const sarifResults: SarifResult[] = [];
+
+  for (const r of report.results) {
+    if (r.status === "pass" || r.status === "skipped") {
+      continue;
+    }
+
+    const level = r.status === "fail" ? "error" : "warning";
+    const resultItem: SarifResult = {
+      ruleId: r.id,
+      level,
+      message: {
+        text: r.fix ? r.message + " Fix: " + r.fix : r.message,
+      },
+      locations: [
+        {
+          physicalLocation: {
+            artifactLocation: {
+              uri: report.target === "." ? "README.md" : report.target,
+            },
+          },
+        },
+      ],
+    };
+    sarifResults.push(resultItem);
+  }
+
+  const sarif: SarifLog = {
+    $schema: "https://json.schemastore.org/sarif-2.1.0.json",
+    version: "2.1.0",
+    runs: [
+      {
+        tool: {
+          driver: {
+            name: "waveforge",
+            informationUri: "https://github.com/Soroban-Clear-Sign-Kit/waveforge",
+            rules: sarifRules,
+          },
+        },
+        results: sarifResults,
+      },
+    ],
+  };
+
+  return JSON.stringify(sarif, null, 2);
+}

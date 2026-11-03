@@ -4,6 +4,7 @@ import {
   formatText,
   formatMarkdown,
   formatJson,
+  formatSarif,
   type Report,
   type CheckResult,
 } from "../src/report.js";
@@ -104,5 +105,28 @@ describe("report formatters", () => {
     expect(parsed.score).toBe(63);
     expect(parsed.results).toHaveLength(4);
     expect(json).toMatchSnapshot();
+  });
+  it("formats sarif report conforming to SARIF 2.1.0 schema", () => {
+    const sarif = formatSarif(sampleReport);
+    const parsed = JSON.parse(sarif);
+    expect(parsed.$schema).toBe("https://json.schemastore.org/sarif-2.1.0.json");
+    expect(parsed.version).toBe("2.1.0");
+    expect(parsed.runs).toHaveLength(1);
+    expect(parsed.runs[0].tool.driver.name).toBe("waveforge");
+    expect(parsed.runs[0].tool.driver.rules).toHaveLength(4);
+
+    // Fail maps to error, warn maps to warning; pass and skipped are excluded from results
+    const results = parsed.runs[0].results;
+    expect(results).toHaveLength(2);
+
+    const warnItem = results.find((r: { ruleId: string }) => r.ruleId === "R2");
+    expect(warnItem).toBeDefined();
+    expect(warnItem.level).toBe("warning");
+    expect(warnItem.message.text).toContain("Add mainnet ID");
+
+    const failItem = results.find((r: { ruleId: string }) => r.ruleId === "R3");
+    expect(failItem).toBeDefined();
+    expect(failItem.level).toBe("error");
+    expect(failItem.message.text).toContain("Remove secret key");
   });
 });

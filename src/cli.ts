@@ -5,7 +5,7 @@ import path from "node:path";
 import { runRepoChecks } from "./repo/index.js";
 import { runIssueLint } from "./issue/index.js";
 import { initAction } from "./init-action.js";
-import { formatText, formatMarkdown, formatJson, type Report } from "./report.js";
+import { formatText, formatMarkdown, formatJson, formatSarif, type Report } from "./report.js";
 
 function getPackageVersion(): string {
   try {
@@ -22,8 +22,8 @@ function printHelp(): void {
   console.log(`waveforge - Stellar Wave readiness checker and issue linter
 
 Usage:
-  waveforge repo [path] [--network=<net>] [--rpc-url=<url>] [--offline] [--json] [--markdown] [--format=text|markdown|json] [--min-score=N]
-  waveforge issue <file|-> [--title=<title>] [--json] [--markdown] [--format=text|markdown|json] [--min-score=N]
+  waveforge repo [path] [--network=<net>] [--rpc-url=<url>] [--offline] [--json] [--markdown] [--format=text|markdown|json|sarif] [--sarif] [--min-score=N]
+  waveforge issue <file|-> [--title=<title>] [--json] [--markdown] [--format=text|markdown|json|sarif] [--sarif] [--min-score=N]
   waveforge init-action [--force] [--ref=<ref>]
   waveforge --help
   waveforge --version
@@ -48,6 +48,9 @@ function printFormattedReport(report: Report, format?: string): void {
   switch (format) {
     case "json":
       console.log(formatJson(report));
+      break;
+    case "sarif":
+      console.log(formatSarif(report));
       break;
     case "markdown":
     case "md":
@@ -86,6 +89,7 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
         ref: { type: "string" },
         json: { type: "boolean", default: false },
         markdown: { type: "boolean", default: false },
+        sarif: { type: "boolean", default: false },
       },
       allowPositionals: true,
       strict: true,
@@ -130,6 +134,8 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
     format = "json";
   } else if (values.markdown) {
     format = "markdown";
+  } else if (values.sarif) {
+    format = "sarif";
   }
 
   const offline = Boolean(values.offline);
