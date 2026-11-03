@@ -335,3 +335,19 @@
   - `gh issue create`: created issues #1 through #9 on GitHub
 - **Open issues**: None.
 
+
+## 2026-11-02 - Step: Standardize Diagnostic Fix Message Copy (Issue #2)
+- **What was built**:
+  - Harmonized user-facing diagnostic fix recommendations across repository checks (src/repo/r1.ts through 
+10.ts) using consistent imperative mood action verbs (Add, Configure, Update, Remove).
+  - Standardized permission error hints in 
+5.ts and 
+6.ts to Configure readable permissions for....
+  - Standardized invalid StrKey fix hint in 
+8.ts to Update contract IDs in README.md and docs/*.md to valid StrKey-encoded Soroban contract addresses (C...)..
+  - Updated docs/DECISIONS.md.
+- **Commands run with results**:
+  - pnpm lint: passed with 0 errors
+  - pnpm typecheck: passed with 0 errors
+  - pnpm build: passed (tsup built ESM and types cleanly)
+- **Open issues**: Closes #2.

@@ -135,7 +135,7 @@ export async function r8Check(root = ".", options: R8CheckOptions = {}): Promise
       status: "warn",
       message: `Invalid contract ID StrKey checksum found: ${invalidCandidates.map((c) => `${c.id} (${c.file}:${c.line})`).join(", ")}.`,
       evidence: invalidCandidates.map((c) => `Invalid StrKey: ${c.id} at ${c.file}:${c.line}`),
-      fix: "Ensure contract IDs in README.md and docs/*.md are valid StrKey-encoded Soroban contract addresses (C...).",
+      fix: "Update contract IDs in README.md and docs/*.md to valid StrKey-encoded Soroban contract addresses (C...).",
     };
   }
 

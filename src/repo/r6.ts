@@ -64,7 +64,7 @@ export async function r6Check(root: string, _options?: unknown): Promise<CheckRe
       title: "CI Workflow Automation",
       status: "fail",
       message: "Could not read .github/workflows directory.",
-      fix: "Ensure .github/workflows is readable.",
+      fix: "Configure readable permissions for .github/workflows.",
     };
   }
 
