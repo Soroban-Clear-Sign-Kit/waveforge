@@ -174,9 +174,51 @@ console.log(`Issue Score: ${issueReport.score}% (Status: ${score(issueReport.res
 
 ## Exit Codes
 
-- **`0`**: Success — all checks passed, or readiness score meets `--min-score` with zero failures.
-- **`1`**: Check Failure — one or more checks failed, or report score is below `--min-score`.
-- **`2`**: Usage or I/O Error — missing command, invalid CLI options, or file/directory not found.
+| Code | Status | Description |
+|---|---|---|
+| `0` | **Success** | All checks passed, or readiness score meets or exceeds `--min-score` threshold with 0 failures. |
+| `1` | **Check Failure** | One or more checks failed, or the calculated score fell below `--min-score`. |
+| `2` | **Usage / I/O Error** | Missing or unrecognized command, invalid option values, or target path does not exist. |
+
+### Shell Script Inspection Examples
+
+WaveForge is designed for seamless integration with CI pipelines, Git pre-commit hooks, and custom shell scripts using standard `$?` exit code checking:
+
+#### 1. Basic Success / Failure Gating (`0` vs `1`)
+```bash
+waveforge repo . --min-score=90
+EXIT_CODE=$?
+
+if [ $EXIT_CODE -eq 0 ]; then
+  echo "Repository is ready for Stellar Wave submission!"
+elif [ $EXIT_CODE -eq 1 ]; then
+  echo "Readiness score below threshold or failures detected." >&2
+  exit 1
+fi
+```
+
+#### 2. Pre-Commit Hook Integration with Fast Fail
+```bash
+# Lint an issue draft before committing
+waveforge issue docs/seed-issues/01.md
+STATUS=$?
+
+if [ $STATUS -ne 0 ]; then
+  echo "WaveForge issue lint failed with exit code $STATUS. Aborting commit." >&2
+  exit $STATUS
+fi
+```
+
+### Edge Cases and Error Behaviors
+
+- **Missing or Invalid Target Paths (`Exit 2`)**:
+  Executing `waveforge repo ./non-existent-dir` or `waveforge issue missing.md` outputs an error to `stderr` and terminates immediately with exit code `2`.
+- **Invalid Option Arguments (`Exit 2`)**:
+  Passing invalid threshold parameters (e.g. `--min-score=invalid` or `--format=unsupported`) produces a parameter error and returns exit code `2`.
+- **Offline Network Handling (`Exit 0` or `1`)**:
+  When running with `--offline` or when Soroban RPC endpoints are unreachable, network-dependent checks (such as contract verification check `R8`) return `status: "skipped"`. Skipped checks do **not** fail the run and are excluded from score calculations, allowing offline CI builds to pass with exit code `0` if all local requirements are satisfied.
+- **Missing Required Flags in Strict Mode (`Exit 2`)**:
+  Specifying `--network=mainnet` without supplying `--rpc-url` returns an error on `stderr` and terminates with exit code `2` to prevent silent misconfiguration.
 
 ---
 
