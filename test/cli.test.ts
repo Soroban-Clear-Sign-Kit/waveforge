@@ -158,4 +158,39 @@ describe("CLI process exit codes", () => {
     expect(res.status).toBe(0);
     expect(res.stdout).toContain("PASS");
   });
+  it("supports repo --fix flag to scaffold missing issue templates in temporary repository", () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "waveforge-cli-fix-"));
+    try {
+      // Create minimal valid repository with LICENSE, README, CONTRIBUTING, SECURITY
+      fs.writeFileSync(path.join(tmp, "LICENSE"), "MIT License\nPermission is hereby granted...");
+      fs.writeFileSync(path.join(tmp, "README.md"), "# Test Project\n\nBuilt on Stellar and Soroban.\n\n## Installation\npnpm install");
+      fs.writeFileSync(path.join(tmp, "CONTRIBUTING.md"), "# Contributing\n\n## Setup\nRun tests.\n## Test\npnpm test\nParticipate in Stellar Wave.");
+      fs.writeFileSync(path.join(tmp, "SECURITY.md"), "# Security Policy\nReport security vulnerabilities to security@example.com.");
+      fs.mkdirSync(path.join(tmp, ".github/workflows"), { recursive: true });
+      fs.writeFileSync(path.join(tmp, ".github/workflows/ci.yml"), "name: CI\non: pull_request\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - run: npm test");
+
+      // Before --fix, R5 reports warning
+      const resBefore = runCli(["repo", tmp, "--offline"]);
+      expect(resBefore.stdout).toContain("WARN  R5");
+
+      // Run with --fix
+      const resFix = runCli(["repo", tmp, "--offline", "--fix"]);
+      expect(resFix.status).toBe(0);
+      expect(resFix.stdout).toContain("[fix] Scaffolded issue templates");
+
+      // Verify files generated
+      const templatesDir = path.join(tmp, ".github", "ISSUE_TEMPLATE");
+      expect(fs.existsSync(path.join(templatesDir, "config.yml"))).toBe(true);
+      expect(fs.existsSync(path.join(templatesDir, "bug.yml"))).toBe(true);
+      expect(fs.existsSync(path.join(templatesDir, "feature.yml"))).toBe(true);
+      expect(fs.existsSync(path.join(templatesDir, "spike.yml"))).toBe(true);
+
+      // After --fix, R5 passes
+      const resAfter = runCli(["repo", tmp, "--offline"]);
+      expect(resAfter.status).toBe(0);
+      expect(resAfter.stdout).toContain("PASS  R5");
+    } finally {
+      fs.rmSync(tmp, { recursive: true, force: true });
+    }
+  });
 });

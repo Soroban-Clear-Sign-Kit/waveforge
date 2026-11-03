@@ -9,3 +9,5 @@ export {
   type CheckResult,
   type Report,
 } from "./report.js";
+
+export { scaffoldTemplates, type ScaffoldOptions, type ScaffoldResult } from "./templates/index.js";
