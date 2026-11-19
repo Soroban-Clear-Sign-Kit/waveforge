@@ -181,9 +181,74 @@ console.log(`Issue Score: ${issueReport.score}% (Status: ${score(issueReport.res
 
 ## Exit Codes
 
-- **`0`**: Success — all checks passed, or readiness score meets `--min-score` with zero failures.
-- **`1`**: Check Failure — one or more checks failed, or report score is below `--min-score`.
-- **`2`**: Usage or I/O Error — missing command, invalid CLI options, or file/directory not found.
+WaveForge uses three exit codes so it can be composed safely in shell scripts, CI pipelines, and pre-commit hooks.
+
+| Code | Meaning | Typical Cause |
+| :--- | :--- | :--- |
+| **`0`** | Success | `--help` / `--version`; all checks passed; score meets `--min-score` with zero failures; issue lint passed; `init-action` wrote the workflow. |
+| **`1`** | Check Failure | Any check or lint rule returned `fail`; score is below `--min-score`; `init-action` refused to overwrite an existing workflow without `--force`. |
+| **`2`** | Usage or I/O Error | Missing or unknown command; unknown option; invalid `--min-score`; repository path or issue file not found; unrecoverable runtime error. |
+
+> A `skipped` check (for example an R8 on-chain lookup under `--offline`) is **not** a failure and never produces exit code `1`.
+
+### Shell Examples
+
+Inspect the code of the previous command with `$?`:
+
+```bash
+# Exit 0 — repository is Wave-ready
+waveforge repo .
+echo $?          # 0
+
+# Exit 1 — a check failed, so the gate blocks the commit
+waveforge repo . --min-score=90
+if [ $? -eq 1 ]; then
+  echo "Repository is not ready: fix the reported checks before opening a PR."
+  exit 1
+fi
+```
+
+```bash
+# Exit 2 — usage error: the file path does not exist
+waveforge issue ./docs/missing-issue.md
+echo $?          # 2
+```
+
+Guard a pre-commit hook so that only genuine check failures block the commit:
+
+```bash
+#!/usr/bin/env bash
+set -u
+waveforge repo . --offline
+status=$?
+
+case "$status" in
+  0) echo "waveforge: repository is ready." ;;
+  1) echo "waveforge: readiness checks failed." >&2; exit 1 ;;
+  2) echo "waveforge: configuration error — check the command and paths." >&2; exit 2 ;;
+  *) echo "waveforge: unexpected exit code $status." >&2; exit "$status" ;;
+esac
+```
+
+Gate a CI job and still upload the report on failure:
+
+```bash
+waveforge repo . --markdown > waveforge-report.md
+status=$?
+[ -n "${GITHUB_STEP_SUMMARY:-}" ] && cat waveforge-report.md >> "$GITHUB_STEP_SUMMARY"
+exit "$status"
+```
+
+### Edge Cases
+
+- **Missing arguments.** `waveforge repo` with no path defaults to the current directory (`.`). `waveforge issue` with no path, and `waveforge` with no command, exit `2`.
+- **Invalid threshold values.** `--min-score=not-a-number` exits `2`. `--min-score=0` disables the gate. `--min-score=101` always exits `1`, because the maximum attainable score is `100`. Negative values are accepted and behave like `0`.
+- **Score threshold vs. failures.** `--min-score` is evaluated *in addition to* check results: a repository that scores `95` but has one failing check still exits `1`.
+- **Offline RPC handling.** With `--offline`, network-dependent checks such as `R8` return `skipped` rather than `fail`. The same fallback applies when the RPC endpoint is unreachable, so a network outage never turns a healthy repository into a failed build. Use `--offline` in hermetic CI environments to make this explicit.
+- **Output format precedence.** When several format flags are supplied, `--json` wins over `--markdown`, which wins over `--sarif`, which wins over `--format=<fmt>`. The exit code is unaffected by the chosen format.
+- **Empty stdin.** `waveforge issue -` with empty input still runs the linter; the missing description and acceptance criteria produce failures, so the command exits `1`, not `2`.
+- **Existing workflow files.** `waveforge init-action` exits `1` when `.github/workflows/waveforge.yml` already exists and `--force` was not passed.
+- **Unreadable directories.** A path that exists but cannot be read (permissions, broken symlink) is reported as an I/O error and exits `2`.
 
 ---
 
